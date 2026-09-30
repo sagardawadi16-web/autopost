@@ -375,12 +375,24 @@ def main() -> None:
         action="store_true",
         help="Print strategic evolution report and exit",
     )
+    parser.add_argument(
+        "--download-gameplay",
+        action="store_true",
+        help="Download and splice royalty-free parkour gameplay footage",
+    )
 
     args = parser.parse_args()
 
     if args.report:
         opt = ChannelOptimizer()
         print(opt.generate_strategy_evolution_report())
+        sys.exit(0)
+
+    if args.download_gameplay:
+        from src.video.gameplay_downloader import GameplayDownloader
+        downloader = GameplayDownloader()
+        downloader.ensure_gameplay_clips(min_clips=2)
+        print("Gameplay footage downloaded and spliced successfully into assets/gameplay/")
         sys.exit(0)
 
     pipeline = AutomationPipeline(channel=args.channel, dry_run=args.dry_run)

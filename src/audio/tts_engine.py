@@ -79,22 +79,55 @@ class TTSEngine:
         audio_path = self.output_dir / f"{output_filename}.mp3"
         timing_path = self.output_dir / f"{output_filename}_timing.json"
 
-        communicate = edge_tts.Communicate(
-            text=text,
-            voice=voice,
-            rate=rate,
-            pitch=pitch,
-            volume=volume,
-        )
+        clean_text = text.strip()
+        if not clean_text:
+            clean_text = "..."
 
         submaker = edge_tts.SubMaker()
         audio_chunks: List[bytes] = []
 
-        async for chunk in communicate.stream():
-            if chunk["type"] == "audio":
-                audio_chunks.append(chunk["data"])
-            elif chunk["type"] in ("WordBoundary", "SentenceBoundary"):
-                submaker.feed(chunk)
+        max_retries = 3
+        last_error = None
+        for attempt in range(max_retries):
+            try:
+                audio_chunks.clear()
+                submaker = edge_tts.SubMaker()
+                communicate = edge_tts.Communicate(
+                    text=clean_text,
+                    voice=voice,
+                    rate=rate,
+                    pitch=pitch,
+                    volume=volume,
+                )
+                async for chunk in communicate.stream():
+                    if chunk["type"] == "audio":
+                        audio_chunks.append(chunk["data"])
+                    elif chunk["type"] in ("WordBoundary", "SentenceBoundary"):
+                        submaker.feed(chunk)
+
+                if audio_chunks:
+                    break
+            except Exception as e:
+                last_error = e
+                logger.warning(f"Edge-TTS attempt {attempt + 1}/{max_retries} failed for voice '{voice}': {e}. Retrying in 1.5s...")
+                import asyncio
+                await asyncio.sleep(1.5)
+        else:
+            logger.warning(f"All standard attempts failed; trying safe fallback voice 'en-US-GuyNeural'...")
+            try:
+                audio_chunks.clear()
+                submaker = edge_tts.SubMaker()
+                communicate = edge_tts.Communicate(text=clean_text, voice="en-US-GuyNeural")
+                async for chunk in communicate.stream():
+                    if chunk["type"] == "audio":
+                        audio_chunks.append(chunk["data"])
+                    elif chunk["type"] in ("WordBoundary", "SentenceBoundary"):
+                        submaker.feed(chunk)
+            except Exception as e:
+                logger.error(f"Fallback voice also failed: {e}")
+                if last_error:
+                    raise last_error
+                raise e
 
         # Write audio data to file
         with open(audio_path, "wb") as f:

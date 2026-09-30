@@ -61,18 +61,28 @@ class GameplayManager:
         """
         out_path = self.output_dir / f"{output_filename}.mp4"
 
-        # Check for user-provided gameplay clips
-        available_clips: List[Path] = []
-        for ext in ("*.mp4", "*.mkv", "*.mov", "*.webm"):
+        # Check for gameplay clips in assets/gameplay
+        available_clips: List[Path] = [
+            f for f in self.gameplay_dir.glob("*.mp4") if f.stat().st_size > 500_000
+        ]
+        for ext in ("*.mkv", "*.mov", "*.webm"):
             available_clips.extend(self.gameplay_dir.glob(ext))
+
+        if not available_clips:
+            try:
+                from src.video.gameplay_downloader import GameplayDownloader
+                downloader = GameplayDownloader(target_dir=self.gameplay_dir)
+                available_clips = downloader.ensure_gameplay_clips(min_clips=1)
+            except Exception as e:
+                logger.warning(f"Could not auto-download gameplay ({e}); proceeding to procedural visualizer.")
 
         if available_clips:
             source_clip = random.choice(available_clips)
-            logger.info(f"Selected raw gameplay clip: '{source_clip.name}'")
+            logger.info(f"Selected gameplay background clip: '{source_clip.name}'")
             return self._slice_and_scale_clip(source_clip, duration_seconds, is_shorts, out_path)
 
-        # Procedural fallback video generator if no clips have been uploaded yet
-        logger.info("No gameplay footage found in assets/gameplay; generating procedural visual background...")
+        # Procedural fallback video generator if offline and no clips exist
+        logger.info("No gameplay footage found; generating procedural visual background...")
         return self._generate_procedural_background(duration_seconds, is_shorts, out_path)
 
     def _slice_and_scale_clip(
@@ -83,34 +93,39 @@ class GameplayManager:
         out_path: Path,
     ) -> Path:
         """Slice a random offset from a video and scale/crop to target resolution."""
-        # Random start offset between 0 and 60 seconds to guarantee uniqueness
-        start_offset = random.randint(0, 45)
+        # Random start offset between 0 and 20 seconds
+        start_offset = random.randint(0, 20)
 
         if is_shorts:
-            # Crop 16:9 to 9:16 (center crop)
-            filter_chain = "crop=ih*9/16:ih:iw/2-(ih*9/16)/2:0,scale=1080:1920:force_original_aspect_ratio=increase,boxblur=1:1"
+            # Crop 16:9 to 9:16 portrait and scale to exactly 1080x1920
+            filter_chain = "crop=ih*9/16:ih:(iw-ih*9/16)/2:0,scale=1080:1920,setsar=1"
         else:
             # 16:9 1080p landscape
-            filter_chain = "scale=1920:1080:force_original_aspect_ratio=increase,crop=1920:1080"
+            filter_chain = "scale=1920:1080:force_original_aspect_ratio=increase,crop=1920:1080,setsar=1"
 
         cmd = [
             get_ffmpeg_cmd(),
             "-y",
             "-ss", str(start_offset),
-            "-stream_loop", "-1",  # loop clip if narration is longer
+            "-stream_loop", "2",
             "-i", str(clip_path),
             "-t", str(duration_sec + 1.0),
             "-vf", filter_chain,
             "-an",  # strip original audio
             "-c:v", "libx264",
-            "-preset", "veryfast",
+            "-preset", "ultrafast",
             "-crf", "23",
+            "-pix_fmt", "yuv420p",
             str(out_path),
         ]
 
         logger.info(f"Rendering sliced background via FFmpeg...")
-        subprocess.run(cmd, capture_output=True, text=True, check=True)
-        return out_path
+        try:
+            subprocess.run(cmd, capture_output=True, text=True, check=True)
+            return out_path
+        except Exception as e:
+            logger.warning(f"Gameplay clip slice failed ({e}); falling back to procedural background.")
+            return self._generate_procedural_background(duration_sec, is_shorts, out_path)
 
     def _generate_procedural_background(
         self,
