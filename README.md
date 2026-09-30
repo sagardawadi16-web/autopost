@@ -166,13 +166,14 @@ AutoPost includes a built-in interactive authorizer to obtain long-lived refresh
 
 ### Run Full Autonomous Production
 ```bash
-# Generate and upload an English Short
+# Generate and upload an English Short (published publicly by default)
 python -m src.pipeline --channel english --format shorts
 
-# Generate and upload a Hindi Short
+# Generate and upload a Hindi Short (published publicly by default)
 python -m src.pipeline --channel hindi --format shorts
 
-# Upload as 'unlisted' or 'private' for review
+# Optional: Upload with custom visibility ('public', 'unlisted', or 'private')
+python -m src.pipeline --channel english --privacy public
 python -m src.pipeline --channel english --privacy unlisted
 ```
 

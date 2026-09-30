@@ -28,7 +28,7 @@ jobs:
           YOUTUBE_CLIENT_SECRET: ${{ secrets.YT_CLIENT_SECRET }}
           YT_EN_REFRESH_TOKEN: ${{ secrets.YT_EN_REFRESH_TOKEN }}
           CHANNEL: english
-        run: python -m src.pipeline --channel english --format shorts
+        run: python -m src.pipeline --channel english --format shorts --privacy public
       - name: Upload Generated Video & Thumbnail Artifacts
         if: always()
         uses: actions/upload-artifact@v4

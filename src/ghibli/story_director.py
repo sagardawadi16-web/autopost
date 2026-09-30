@@ -201,8 +201,8 @@ class StoryDirector:
             for s in chosen["scenes"]
         ]
 
-        if is_shorts and len(scenes) > 5:
-            scenes = scenes[:5]
+        if scene_count and len(scenes) > scene_count:
+            scenes = scenes[:scene_count]
 
         return GhibliStory(
             title=chosen["title"],
@@ -248,7 +248,7 @@ Generate a structured JSON output with:
 
 Respond ONLY with valid JSON.
 """
-        model = genai.GenerativeModel("gemini-2.5-flash")
+        model = genai.GenerativeModel("gemini-3.8-flash")
         resp = model.generate_content(prompt)
         text = resp.text.strip()
         if text.startswith("```json"):

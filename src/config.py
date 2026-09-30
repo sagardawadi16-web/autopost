@@ -220,6 +220,13 @@ class VideoSettings:
     audio_bitrate: str = "192k"
 
 
+DEFAULT_PRIVACY_STATUS: str = (
+    os.environ.get("YOUTUBE_PRIVACY_STATUS")
+    or os.environ.get("PRIVACY_STATUS")
+    or "public"
+)
+
+
 @dataclass(frozen=True)
 class YouTubeUploadSettings:
     """YouTube API upload and categorization settings.
@@ -233,7 +240,7 @@ class YouTubeUploadSettings:
     """
 
     category_id: int = 24  # Entertainment
-    default_privacy_status: str = "private"
+    default_privacy_status: str = DEFAULT_PRIVACY_STATUS
     default_language: str = "en"
     notify_subscribers: bool = True
     self_declared_made_for_kids: bool = False
@@ -346,7 +353,7 @@ VIDEO_SETTINGS = VideoSettings(
 
 YOUTUBE_SETTINGS = YouTubeUploadSettings(
     category_id=24,
-    default_privacy_status="private",
+    default_privacy_status=DEFAULT_PRIVACY_STATUS,
     default_language="en",
     notify_subscribers=True,
     self_declared_made_for_kids=False,

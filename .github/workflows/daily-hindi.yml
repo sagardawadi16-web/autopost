@@ -28,7 +28,7 @@ jobs:
           YOUTUBE_CLIENT_SECRET: ${{ secrets.YT_CLIENT_SECRET }}
           YT_HI_REFRESH_TOKEN: ${{ secrets.YT_HI_REFRESH_TOKEN }}
           CHANNEL: hindi
-        run: python -m src.pipeline --channel hindi --format shorts
+        run: python -m src.pipeline --channel hindi --format shorts --privacy public
       - name: Upload Generated Video & Thumbnail Artifacts
         if: always()
         uses: actions/upload-artifact@v4

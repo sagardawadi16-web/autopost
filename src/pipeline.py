@@ -37,6 +37,7 @@ from src.config import (
     validate_environment,
     CHANNEL_CONFIGS,
     OUTPUT_DIR,
+    YOUTUBE_SETTINGS,
 )
 from src.evolution.learning_memory import StrategicLearningMemory
 from src.evolution.optimizer import ChannelOptimizer
@@ -67,7 +68,7 @@ from src.video.subtitle_styler import SubtitleStyler
 class AutomationPipeline:
     """Master controller executing the complete automated production pipeline."""
 
-    def __init__(self, channel: str = "english", dry_run: bool = False, privacy: str = "public") -> None:
+    def __init__(self, channel: str = "english", dry_run: bool = False, privacy: Optional[str] = None) -> None:
         """Initialize pipeline for a target channel.
 
         Args:
@@ -77,7 +78,7 @@ class AutomationPipeline:
         """
         self.channel = channel.lower()
         self.dry_run = dry_run
-        self.privacy = privacy
+        self.privacy = (privacy or YOUTUBE_SETTINGS.default_privacy_status or "public").lower()
         ensure_directories()
 
         self.memory = StrategicLearningMemory()
@@ -280,7 +281,7 @@ class AutomationPipeline:
             video_path=final_video,
             metadata=metadata,
             thumbnail_path=thumbnail_path,
-            privacy_status="unlisted" if effective_dry_run else self.privacy,
+            privacy_status=self.privacy,
             channel_name=self.channel,
             dry_run=effective_dry_run,
         )
@@ -395,7 +396,7 @@ def main() -> None:
     parser.add_argument(
         "--privacy",
         choices=["public", "unlisted", "private"],
-        default="public",
+        default=YOUTUBE_SETTINGS.default_privacy_status,
         help="YouTube video visibility status (default: public)",
     )
 

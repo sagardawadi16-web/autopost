@@ -45,7 +45,7 @@ class YouTubeUploader:
         video_path: Path,
         metadata: VideoMetadata,
         thumbnail_path: Optional[Path] = None,
-        privacy_status: str = "unlisted",
+        privacy_status: Optional[str] = None,
         channel_name: str = "english",
         dry_run: bool = False,
     ) -> Dict[str, Any]:
@@ -55,15 +55,17 @@ class YouTubeUploader:
             video_path: Path to MP4 file.
             metadata: VideoMetadata containing title, description, tags.
             thumbnail_path: Optional path to custom thumbnail JPEG.
-            privacy_status: 'private', 'unlisted', or 'public'.
+            privacy_status: 'public', 'unlisted', or 'private'. Defaults to YOUTUBE_SETTINGS.default_privacy_status ('public').
             channel_name: Identifier of the channel ('english' or 'hindi').
             dry_run: If True, simulates upload without contacting YouTube.
 
         Returns:
             Dictionary with upload result (video_id, url, status).
         """
+        privacy_status = privacy_status or YOUTUBE_SETTINGS.default_privacy_status or "public"
+
         if dry_run:
-            logger.info(f"[DRY-RUN] Simulating YouTube upload for '{video_path.name}'...")
+            logger.info(f"[DRY-RUN] Simulating YouTube upload for '{video_path.name}' (Privacy: {privacy_status})...")
             fake_id = f"sim_{datetime.now(timezone.utc).strftime('%Y%m%d%H%M%S')}"
             res = {
                 "video_id": fake_id,

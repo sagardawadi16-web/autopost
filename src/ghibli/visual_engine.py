@@ -60,19 +60,18 @@ class VisualEngine:
 
         logger.info(f"Generating Ghibli frame for Scene {scene_index} ({width}x{height})...")
 
-        # Encode URL for Pollinations Flux engine
         encoded_prompt = urllib.parse.quote(enhanced_prompt)
         seed_param = f"&seed={seed}" if seed is not None else ""
-        image_url = (
-            f"https://image.pollinations.ai/prompt/{encoded_prompt}"
-            f"?width={width}&height={height}&model=flux&nologo=true{seed_param}"
-        )
 
-        # Retry logic with network resilience
-        max_retries = 3
-        for attempt in range(1, max_retries + 1):
+        # Multi-model fallback across attempts (Flux -> Turbo)
+        models = ["flux", "turbo", "flux"]
+        for attempt, model_name in enumerate(models, start=1):
             try:
                 t0 = time.time()
+                image_url = (
+                    f"https://image.pollinations.ai/prompt/{encoded_prompt}"
+                    f"?width={width}&height={height}&model={model_name}&nologo=true{seed_param}"
+                )
                 req = urllib.request.Request(
                     image_url,
                     headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"},
@@ -86,12 +85,12 @@ class VisualEngine:
                 with Image.open(output_file) as img:
                     img.verify()
 
-                logger.info(f"Scene {scene_index} image successfully rendered in {time.time() - t0:.2f}s ({output_file.name})")
+                logger.info(f"Scene {scene_index} image successfully rendered in {time.time() - t0:.2f}s [{model_name}] ({output_file.name})")
                 return output_file
 
             except Exception as e:
-                logger.warning(f"Image generation attempt {attempt}/{max_retries} failed ({e}). Retrying...")
-                time.sleep(2)
+                logger.warning(f"Image generation attempt {attempt} ({model_name}) note: {e}. Trying next...")
+                time.sleep(1.5)
 
         # Fallback procedural painterly placeholder if network fails
         logger.warning(f"Network generation failed. Generating emergency Ghibli placeholder for Scene {scene_index}")
