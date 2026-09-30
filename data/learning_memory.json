@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "last_updated": "2026-09-30T15:39:24.840520+00:00",
+  "last_updated": "2026-09-30T17:32:02.558959+00:00",
   "niche_weights": {
     "nosleep": 1.25,
     "creepy": 1.15,
@@ -93,6 +93,15 @@
       "timestamp": "2026-09-30T15:39:24.840520+00:00",
       "hypothesis": "Testing drama story from r/AmItheAsshole with Direct stakes confrontation hook.",
       "observation": "Achieved 850 views, 7.4% CTR, and 64.2% retention.",
+      "reasoning": "",
+      "rule_added": "Maintain baseline pacing for drama.",
+      "confidence_score": 0.85
+    },
+    {
+      "id": "exp_006_202609301732",
+      "timestamp": "2026-09-30T17:32:02.558959+00:00",
+      "hypothesis": "Testing drama story from r/AmItheAsshole with Direct stakes confrontation hook.",
+      "observation": "Achieved 1250 views, 7.4% CTR, and 64.2% retention.",
       "reasoning": "",
       "rule_added": "Maintain baseline pacing for drama.",
       "confidence_score": 0.85
