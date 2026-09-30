@@ -17,6 +17,8 @@ from typing import Optional
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 
+import src.config  # Automatically loads .env file
+
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 logger = logging.getLogger(__name__)
 
@@ -101,11 +103,32 @@ def authorize_channel(channel: str, client_id: Optional[str] = None, client_secr
         scopes=YOUTUBE_SCOPES,
     )
 
-    print("\n🌐 A browser window will now open for Google Channel Login...")
-    print("   👉 Make sure you select the Google Account / Brand Channel for your YouTube Channel.")
-    print("   👉 If you see 'Google hasn't verified this app', click 'Advanced' -> 'Go to app (unsafe)' to proceed.")
+    auth_url, _ = flow.authorization_url(prompt="consent", access_type="offline")
+    print("\n" + "=" * 60)
+    print("🌐 GOOGLE YOUTUBE AUTHORIZATION LINK:")
+    print(auth_url)
+    print("=" * 60)
+    print("👉 If your browser did not automatically open, click or paste the URL above.")
+    print("👉 Sign in with your YouTube channel account.")
+    print("👉 If you see 'Google hasn't verified this app', click 'Advanced' -> 'Go to AutoPost (unsafe)' -> 'Allow'.\n")
 
-    creds = flow.run_local_server(port=8080, prompt="consent", access_type="offline")
+    creds = None
+    for test_port in (8080, 8090, 8888, 0):
+        try:
+            logger.info(f"Starting local OAuth listener on port {test_port}...")
+            creds = flow.run_local_server(
+                port=test_port,
+                prompt="consent",
+                access_type="offline",
+                open_browser=True,
+            )
+            if creds:
+                break
+        except OSError as e:
+            logger.warning(f"Port {test_port} unavailable ({e}), trying next port...")
+
+    if not creds:
+        raise RuntimeError("Failed to bind OAuth listener to any local port.")
 
     refresh_token = creds.refresh_token
     if not refresh_token:
@@ -122,17 +145,20 @@ def authorize_channel(channel: str, client_id: Optional[str] = None, client_secr
     except Exception as e:
         print(f"Note: Token generated, but channel metadata fetch had note: {e}")
 
-    # Determine token variable name
-    token_var = f"YT_{channel.upper()}_REFRESH_TOKEN" if channel in ("english", "hindi") else f"YT_{channel.upper()}_REFRESH_TOKEN"
-    update_env_file(token_var, refresh_token)
+    # Determine token variable names (both short and descriptive forms)
+    short_var = "YT_EN_REFRESH_TOKEN" if channel == "english" else "YT_HI_REFRESH_TOKEN"
+    long_var = f"YT_{channel.upper()}_REFRESH_TOKEN"
+    update_env_file(short_var, refresh_token)
+    update_env_file(long_var, refresh_token)
 
     # Sync to GitHub Actions Secrets
     repo_name = "sagardawadi16-web/autopost"
     sync_github_secret(repo_name, "YT_CLIENT_ID", cid)
     sync_github_secret(repo_name, "YT_CLIENT_SECRET", csecret)
-    sync_github_secret(repo_name, token_var, refresh_token)
+    sync_github_secret(repo_name, short_var, refresh_token)
+    sync_github_secret(repo_name, long_var, refresh_token)
 
-    print(f"\n✅ All set! Token saved to .env as '{token_var}' and synchronized to GitHub Actions!")
+    print(f"\n✅ All set! Token saved to .env as '{short_var}' and '{long_var}' and synchronized to GitHub Actions!")
     return refresh_token
 
 

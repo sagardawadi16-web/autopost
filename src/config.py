@@ -90,8 +90,8 @@ GEMINI_API_KEY: Optional[str] = os.environ.get("GEMINI_API_KEY", None)
 
 YOUTUBE_CLIENT_ID: Optional[str] = os.environ.get("YOUTUBE_CLIENT_ID", None)
 YOUTUBE_CLIENT_SECRET: Optional[str] = os.environ.get("YOUTUBE_CLIENT_SECRET", None)
-YT_EN_REFRESH_TOKEN: Optional[str] = os.environ.get("YT_EN_REFRESH_TOKEN", None)
-YT_HI_REFRESH_TOKEN: Optional[str] = os.environ.get("YT_HI_REFRESH_TOKEN", None)
+YT_EN_REFRESH_TOKEN: Optional[str] = os.environ.get("YT_EN_REFRESH_TOKEN") or os.environ.get("YT_ENGLISH_REFRESH_TOKEN")
+YT_HI_REFRESH_TOKEN: Optional[str] = os.environ.get("YT_HI_REFRESH_TOKEN") or os.environ.get("YT_HINDI_REFRESH_TOKEN")
 
 R2_ACCESS_KEY: Optional[str] = os.environ.get("R2_ACCESS_KEY", None)
 R2_SECRET_KEY: Optional[str] = os.environ.get("R2_SECRET_KEY", None)

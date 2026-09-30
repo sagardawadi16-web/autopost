@@ -67,15 +67,17 @@ from src.video.subtitle_styler import SubtitleStyler
 class AutomationPipeline:
     """Master controller executing the complete automated production pipeline."""
 
-    def __init__(self, channel: str = "english", dry_run: bool = False) -> None:
+    def __init__(self, channel: str = "english", dry_run: bool = False, privacy: str = "public") -> None:
         """Initialize pipeline for a target channel.
 
         Args:
             channel: 'english' or 'hindi'.
             dry_run: If True, operates in simulation/testing mode.
+            privacy: YouTube privacy status ('public', 'unlisted', or 'private').
         """
         self.channel = channel.lower()
         self.dry_run = dry_run
+        self.privacy = privacy
         ensure_directories()
 
         self.memory = StrategicLearningMemory()
@@ -278,7 +280,7 @@ class AutomationPipeline:
             video_path=final_video,
             metadata=metadata,
             thumbnail_path=thumbnail_path,
-            privacy_status="unlisted" if effective_dry_run else "public",
+            privacy_status="unlisted" if effective_dry_run else self.privacy,
             channel_name=self.channel,
             dry_run=effective_dry_run,
         )
@@ -390,6 +392,13 @@ def main() -> None:
         help="Run interactive YouTube OAuth setup for the specified channel",
     )
 
+    parser.add_argument(
+        "--privacy",
+        choices=["public", "unlisted", "private"],
+        default="public",
+        help="YouTube video visibility status (default: public)",
+    )
+
     args = parser.parse_args()
 
     if args.report:
@@ -409,7 +418,7 @@ def main() -> None:
         authorize_channel(channel=args.channel)
         sys.exit(0)
 
-    pipeline = AutomationPipeline(channel=args.channel, dry_run=args.dry_run)
+    pipeline = AutomationPipeline(channel=args.channel, dry_run=args.dry_run, privacy=args.privacy)
 
     if args.format == "both":
         pipeline.run(is_shorts=False)
