@@ -146,7 +146,12 @@ def authorize_channel(channel: str, client_id: Optional[str] = None, client_secr
         print(f"Note: Token generated, but channel metadata fetch had note: {e}")
 
     # Determine token variable names (both short and descriptive forms)
-    short_var = "YT_EN_REFRESH_TOKEN" if channel == "english" else "YT_HI_REFRESH_TOKEN"
+    if channel == "english":
+        short_var = "YT_EN_REFRESH_TOKEN"
+    elif channel == "hindi":
+        short_var = "YT_HI_REFRESH_TOKEN"
+    else:
+        short_var = f"YT_{channel.upper()}_REFRESH_TOKEN"
     long_var = f"YT_{channel.upper()}_REFRESH_TOKEN"
     update_env_file(short_var, refresh_token)
     update_env_file(long_var, refresh_token)
@@ -166,9 +171,9 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Authorize YouTube Channel OAuth access.")
     parser.add_argument(
         "--channel",
-        choices=["english", "hindi"],
-        default="english",
-        help="Target channel profile (english or hindi)",
+        choices=["english", "hindi", "ghibli"],
+        default="ghibli",
+        help="Target channel profile (english, hindi, or ghibli)",
     )
     parser.add_argument("--client-id", default=None, help="Google OAuth Client ID")
     parser.add_argument("--client-secret", default=None, help="Google OAuth Client Secret")
