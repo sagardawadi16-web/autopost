@@ -270,13 +270,17 @@ class AutomationPipeline:
         # 9. YouTube Upload
         # -------------------------------------------------------------
         logger.info("Initiating YouTube publication flow...")
+        effective_dry_run = self.dry_run or (not self.uploader.auth or not self.uploader.auth.refresh_token)
+        if effective_dry_run and not self.dry_run:
+            logger.info("No active YouTube OAuth credentials detected; safely simulating upload in dry-run mode.")
+
         upload_result = self.uploader.upload_video(
             video_path=final_video,
             metadata=metadata,
             thumbnail_path=thumbnail_path,
-            privacy_status="unlisted" if self.dry_run else "public",
+            privacy_status="unlisted" if effective_dry_run else "public",
             channel_name=self.channel,
-            dry_run=self.dry_run,
+            dry_run=effective_dry_run,
         )
 
         # Mark story used
