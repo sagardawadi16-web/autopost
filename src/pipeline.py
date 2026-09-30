@@ -42,7 +42,7 @@ from src.evolution.learning_memory import StrategicLearningMemory
 from src.evolution.optimizer import ChannelOptimizer
 from src.scraper.reddit_client import RedditClient
 from src.scraper.story_cache import StoryCache
-from src.scraper.story_fetcher import StoryFetcher
+from src.scraper.story_fetcher import AIStoryGenerator, StoryFetcher
 from src.scraper.story_selector import StorySelector
 from src.scriptwriter.dialogue_splitter import DialogueSplitter
 from src.scriptwriter.evaluator import ContentEvaluator
@@ -321,7 +321,7 @@ class AutomationPipeline:
         return report
 
     def _get_target_story(self, is_shorts: bool) -> Dict[str, Any]:
-        """Fetch real Reddit story or fallback to curated viral story."""
+        """Fetch real Reddit story or synthesize an original viral story via AI."""
         env_status = validate_environment()
         has_reddit_creds = env_status.get("REDDIT_CLIENT_ID") and env_status.get("REDDIT_CLIENT_SECRET")
 
@@ -343,27 +343,11 @@ class AutomationPipeline:
                 if selected:
                     return selected[0]
             except Exception as e:
-                logger.warning(f"Reddit API fetch encountered an error ({e}); using curated viral story.")
+                logger.warning(f"Reddit API fetch unavailable/blocked ({e}); switching to AI Story Generator.")
 
-        # High-converting baseline story for testing and turnkey immediate execution
-        return {
-            "id": f"story_curated_{self.channel}_{'short' if is_shorts else 'long'}",
-            "title": "My Landlord Tried to Evict Me on Christmas Eve, so I Bought the Building",
-            "body": (
-                "My landlord was infamous for cutting off hot water in winter and terrorizing tenants. "
-                "On Christmas Eve, he shoved an illegal 24-hour eviction notice under my door, laughing in my face. "
-                "He thought I was just a broke college kid living paycheck to paycheck. What he didn't know was that "
-                "my grandfather had left me a substantial commercial trust that I had never touched. "
-                "The very next morning, I contacted his bank and discovered his mortgage was in severe default. "
-                "Within four weeks, I bought his defaulted loan and foreclosed on him. "
-                "When I handed him his own eviction notice, the look of terror on his face was worth every single penny."
-            ),
-            "score": 14200,
-            "num_comments": 850,
-            "subreddit": "ProRevenge",
-            "word_count": 125,
-            "upvote_ratio": 0.96,
-        }
+        # Autonomous AI story synthesis (bypasses Reddit blocks completely, 0% copyright risk)
+        ai_gen = AIStoryGenerator(api_key=os.environ.get("GEMINI_API_KEY"))
+        return ai_gen.generate_viral_story(target_word_count=150 if is_shorts else 1100)
 
 
 def main() -> None:
