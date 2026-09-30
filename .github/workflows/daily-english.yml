@@ -1,0 +1,40 @@
+name: Daily English Video
+on:
+  schedule:
+    - cron: '30 11 * * *'  # ~5:15 PM Nepal time
+  workflow_dispatch:  # Manual trigger for testing
+
+jobs:
+  generate-and-upload:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+      - name: Install system dependencies
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg
+      - name: Install Python dependencies
+        run: pip install -r requirements.txt
+      - name: Run pipeline
+        env:
+          REDDIT_CLIENT_ID: ${{ secrets.REDDIT_CLIENT_ID }}
+          REDDIT_CLIENT_SECRET: ${{ secrets.REDDIT_CLIENT_SECRET }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          YOUTUBE_CLIENT_ID: ${{ secrets.YT_CLIENT_ID }}
+          YOUTUBE_CLIENT_SECRET: ${{ secrets.YT_CLIENT_SECRET }}
+          YT_EN_REFRESH_TOKEN: ${{ secrets.YT_EN_REFRESH_TOKEN }}
+          R2_ACCESS_KEY: ${{ secrets.R2_ACCESS_KEY }}
+          R2_SECRET_KEY: ${{ secrets.R2_SECRET_KEY }}
+          CHANNEL: english
+        run: python -m src.pipeline --channel english
+      - name: Update story cache
+        run: |
+          git config user.name 'AutoPost Bot'
+          git config user.email 'bot@autopost.local'
+          git add data/used_stories.json data/upload_log.json
+          git diff --staged --quiet || git commit -m 'Update story cache and upload log'
+          git push

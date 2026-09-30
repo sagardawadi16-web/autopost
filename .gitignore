@@ -1,0 +1,14 @@
+__pycache__/
+*.pyc
+.env
+data/
+output/
+assets/gameplay/
+*.mp4
+*.mp3
+*.wav
+.venv/
+venv/
+node_modules/
+*.json.bak
+secrets.json
