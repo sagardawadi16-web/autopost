@@ -1,12 +1,27 @@
-"""Cross-platform utility functions and binary locators for FFmpeg and FFprobe."""
+"""Cross-platform utility functions, binary locators, and Gemini API fallback helper."""
 
 from __future__ import annotations
 
 import logging
 import os
 import shutil
+import time
 from pathlib import Path
-from typing import Optional
+from typing import List, Optional
+
+# Automatically load .env if present
+_env_path = Path(__file__).parent.parent / ".env"
+if _env_path.exists():
+    try:
+        with open(_env_path, "r", encoding="utf-8") as f:
+            for line in f:
+                line = line.strip()
+                if line and not line.startswith("#") and "=" in line:
+                    k, v = line.split("=", 1)
+                    if k.strip() not in os.environ:
+                        os.environ[k.strip()] = v.strip().strip('"').strip("'")
+    except Exception:
+        pass
 
 logger = logging.getLogger(__name__)
 
@@ -18,20 +33,25 @@ KNOWN_FFMPEG_PATHS = [
     Path("C:/ProgramData/chocolatey/bin/ffmpeg.exe"),
 ]
 
+# Preferred models in priority order
+PREFERRED_GEMINI_MODELS = [
+    "gemini-3.8-flash",
+    "gemini-3.5-flash",
+    "gemini-3.5-flash-lite",
+    "gemini-3.1-flash-lite",
+]
+
 
 def get_ffmpeg_cmd() -> str:
     """Resolve the working command/path to the FFmpeg executable."""
-    # 1. Check if 'ffmpeg' is already in system PATH
     found = shutil.which("ffmpeg")
     if found:
         return found
 
-    # 2. Check known Windows locations
     for p in KNOWN_FFMPEG_PATHS:
         if p.exists():
             return str(p.resolve())
 
-    # 3. Search under WinGet packages directory dynamically
     winget_dir = Path(os.environ.get("LOCALAPPDATA", "")) / "Microsoft" / "WinGet" / "Packages"
     if winget_dir.exists():
         candidates = list(winget_dir.glob("**/ffmpeg.exe"))
@@ -54,3 +74,51 @@ def get_ffprobe_cmd() -> str:
             return str(probe_sibling.resolve())
 
     return "ffprobe"
+
+
+def call_gemini_with_fallback(
+    prompt: str,
+    system_instruction: Optional[str] = None,
+    api_key: Optional[str] = None,
+) -> str:
+    """Invoke Gemini API trying preferred models with automatic failover.
+
+    Args:
+        prompt: User prompt content.
+        system_instruction: Optional system instruction.
+        api_key: Gemini API key.
+
+    Returns:
+        Generated text response.
+
+    Raises:
+        Exception if all models fail.
+    """
+    import google.generativeai as genai
+
+    key = api_key or os.environ.get("GEMINI_API_KEY")
+    if not key:
+        raise ValueError("GEMINI_API_KEY is not configured.")
+
+    genai.configure(api_key=key)
+
+    last_error: Optional[Exception] = None
+    for model_name in PREFERRED_GEMINI_MODELS:
+        try:
+            logger.info(f"Invoking Gemini model: {model_name}...")
+            kwargs = {}
+            if system_instruction:
+                kwargs["system_instruction"] = system_instruction
+            model = genai.GenerativeModel(model_name, **kwargs)
+            res = model.generate_content(prompt)
+            if res and res.text:
+                return res.text.strip()
+        except Exception as e:
+            err_str = str(e)
+            logger.warning(f"Model {model_name} encountered error: {err_str[:120]}... Trying next model.")
+            last_error = e
+            time.sleep(1.0)
+
+    if last_error:
+        raise last_error
+    raise RuntimeError("All Gemini models failed.")

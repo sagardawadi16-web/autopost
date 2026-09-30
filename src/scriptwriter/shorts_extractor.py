@@ -80,10 +80,7 @@ class ShortsExtractor:
         language: str,
     ) -> str:
         """Call Gemini to condense the narrative into a viral vertical Short."""
-        import google.generativeai as genai
-
-        genai.configure(api_key=self.api_key)
-        model = genai.GenerativeModel("gemini-1.5-flash")
+        from src.utils import call_gemini_with_fallback
 
         prompt = f"""
 You are an expert viral YouTube Shorts producer. Condense the following story into an intense 50-second Short.
@@ -103,8 +100,7 @@ STORY TEXT:
 
 Generate the Shorts script now:
 """
-        response = model.generate_content(prompt)
-        return response.text.strip()
+        return call_gemini_with_fallback(prompt=prompt, api_key=self.api_key)
 
     def _extract_heuristic(self, title: str, body: str, category: str) -> str:
         """Deterministic heuristic condenser targeting ~140 words."""

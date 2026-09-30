@@ -113,10 +113,7 @@ class ScriptRewriter:
         revisions_context: List[str],
     ) -> str:
         """Call Gemini API to transform narrative with specific structural tags."""
-        import google.generativeai as genai
-
-        genai.configure(api_key=self.api_key)
-        model = genai.GenerativeModel("gemini-1.5-flash")
+        from src.utils import call_gemini_with_fallback
 
         directives_str = "\n".join(f"- {d}" for d in directives)
         revisions_str = ""
@@ -153,8 +150,11 @@ Body:
 Generate the formatted script now:
 """
 
-        response = model.generate_content([system_instructions, prompt])
-        return response.text.strip()
+        return call_gemini_with_fallback(
+            prompt=prompt,
+            system_instruction=system_instructions,
+            api_key=self.api_key,
+        )
 
     def _generate_heuristic(
         self,

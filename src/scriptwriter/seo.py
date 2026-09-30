@@ -85,10 +85,7 @@ class SEOGenerator:
         is_shorts: bool,
     ) -> VideoMetadata:
         """Generate metadata using Gemini LLM."""
-        import google.generativeai as genai
-
-        genai.configure(api_key=self.api_key)
-        model = genai.GenerativeModel("gemini-1.5-flash")
+        from src.utils import call_gemini_with_fallback
 
         directives = self.memory.get_seo_directives()
         directives_str = "\n".join(f"- {d}" for d in directives)
@@ -121,8 +118,7 @@ Return ONLY valid JSON:
   "hashtags": ["#string"]
 }}
 """
-        response = model.generate_content(prompt)
-        text = response.text.strip()
+        text = call_gemini_with_fallback(prompt=prompt, api_key=self.api_key)
         text = re.sub(r"^```(?:json)?", "", text)
         text = re.sub(r"```$", "", text).strip()
         import json

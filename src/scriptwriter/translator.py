@@ -45,10 +45,7 @@ class ScriptTranslator:
 
     def _translate_with_gemini(self, script_text: str, category: str) -> str:
         """Translate script via Gemini LLM maintaining speaker tags and dramatic tension."""
-        import google.generativeai as genai
-
-        genai.configure(api_key=self.api_key)
-        model = genai.GenerativeModel("gemini-1.5-flash")
+        from src.utils import call_gemini_with_fallback
 
         system_prompt = f"""
 You are a master Hindi scriptwriter and voice director for Indian YouTube channels.
@@ -62,8 +59,11 @@ CRITICAL RULES:
 4. Output ONLY the translated script.
 """
 
-        response = model.generate_content([system_prompt, script_text[:5000]])
-        return response.text.strip()
+        return call_gemini_with_fallback(
+            prompt=script_text[:5000],
+            system_instruction=system_prompt,
+            api_key=self.api_key,
+        )
 
     def _translate_heuristic(self, script_text: str) -> str:
         """Deterministic placeholder translator for offline testing."""

@@ -90,11 +90,8 @@ class AIStoryGenerator:
         word_count: int,
     ) -> Dict[str, Any]:
         """Synthesize original Reddit story via Gemini LLM."""
-        import google.generativeai as genai
+        from src.utils import call_gemini_with_fallback
         import json
-
-        genai.configure(api_key=self.api_key)
-        model = genai.GenerativeModel("gemini-1.5-flash")
 
         prompt = f"""
 You are a viral internet storyteller. Write a 100% original, realistic story formatted as an authentic post from r/{subreddit}.
@@ -113,8 +110,7 @@ CRITICAL REQUIREMENTS:
   "body": "The full story text with paragraph breaks..."
 }}
 """
-        response = model.generate_content(prompt)
-        text = response.text.strip()
+        text = call_gemini_with_fallback(prompt=prompt, api_key=self.api_key)
         text = re.sub(r"^```(?:json)?", "", text)
         text = re.sub(r"```$", "", text).strip()
         data = json.loads(text)

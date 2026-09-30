@@ -195,10 +195,7 @@ class ContentEvaluator:
         is_shorts: bool,
     ) -> EvaluationReport:
         """Utilize Gemini LLM to execute structured editorial reasoning."""
-        import google.generativeai as genai
-
-        genai.configure(api_key=self.api_key)
-        model = genai.GenerativeModel("gemini-1.5-flash")
+        from src.utils import call_gemini_with_fallback
 
         prompt = f"""
 You are the Executive Editorial Director and Chief Algorithm Strategist of a viral YouTube network.
@@ -232,8 +229,7 @@ Return ONLY valid JSON matching this schema:
   "actionable_revisions": [string]
 }}
 """
-        response = model.generate_content(prompt)
-        text = response.text.strip()
+        text = call_gemini_with_fallback(prompt=prompt, api_key=self.api_key)
         # Clean markdown codeblocks
         text = re.sub(r"^```(?:json)?", "", text)
         text = re.sub(r"```$", "", text).strip()
