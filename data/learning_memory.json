@@ -1,0 +1,107 @@
+{
+  "version": "1.0.0",
+  "last_updated": "2026-09-30T15:39:24.840520+00:00",
+  "niche_weights": {
+    "nosleep": 1.25,
+    "creepy": 1.15,
+    "ProRevenge": 1.4,
+    "AmItheAsshole": 1.35,
+    "entitledparents": 1.2,
+    "relationship_advice": 1.1,
+    "tifu": 1.05
+  },
+  "winning_hook_patterns": [
+    "Shock confession opener (e.g. 'I shouldn't be posting this, but...')",
+    "Direct stakes confrontation (e.g. 'She thought she could ruin my life. She was wrong.')",
+    "Eerie sensory mystery (e.g. 'Every night at 3:17 AM, my basement door clicks unlocked.')",
+    "Immediate moral dilemma (e.g. 'My sister demanded I give her my inheritance. Here is what I did instead.')",
+    "Maintain baseline pacing for revenge.",
+    "Maintain baseline pacing for drama."
+  ],
+  "failing_patterns": [
+    "Long introductory backstory without immediate conflict in first 5 seconds.",
+    "Monotone robotic pacing without pitch modulation.",
+    "Unclear or cluttered thumbnails with more than 4 words.",
+    "Overly complex vocabulary that reduces casual listening accessibility."
+  ],
+  "winning_thumbnail_styles": {
+    "horror": {
+      "dominant_color": "crimson_and_black",
+      "contrast_accent": "bright_yellow",
+      "max_words": 3,
+      "badge_text": "DON'T WATCH ALONE"
+    },
+    "drama": {
+      "dominant_color": "dark_purple_and_black",
+      "contrast_accent": "neon_green",
+      "max_words": 4,
+      "badge_text": "INSTANT REGRET"
+    },
+    "revenge": {
+      "dominant_color": "deep_navy_and_gold",
+      "contrast_accent": "blazing_red",
+      "max_words": 3,
+      "badge_text": "SWEET REVENGE"
+    }
+  },
+  "optimal_pacing": {
+    "english_wpm": 155,
+    "hindi_wpm": 140,
+    "shorts_target_seconds": 54,
+    "longform_target_minutes": 9.5,
+    "cliffhanger_frequency_seconds": 120
+  },
+  "experiment_history": [
+    {
+      "id": "exp_001_baseline",
+      "timestamp": "2026-09-30T14:15:53.076969+00:00",
+      "hypothesis": "High-conflict ProRevenge and AITA stories generate superior early retention over slow-burn horror on Shorts.",
+      "observation": "Audience drops off within 4 seconds if stakes aren't stated in sentence 1.",
+      "reasoning": "Mobile viewers need instant context and strong emotional polarity (heroes vs villains) to pause scrolling.",
+      "rule_added": "Always rewrite paragraph 1 to plunge straight into climax/conflict before revealing backstory.",
+      "confidence_score": 0.88
+    },
+    {
+      "id": "exp_002_202609301427",
+      "timestamp": "2026-09-30T14:27:00.765581+00:00",
+      "hypothesis": "Testing revenge story from r/ProRevenge with Direct stakes confrontation hook.",
+      "observation": "Achieved 850 views, 7.4% CTR, and 64.2% retention.",
+      "reasoning": "",
+      "rule_added": "Maintain baseline pacing for revenge.",
+      "confidence_score": 0.85
+    },
+    {
+      "id": "exp_003_202609301435",
+      "timestamp": "2026-09-30T14:35:42.274555+00:00",
+      "hypothesis": "Testing revenge story from r/ProRevenge with Direct stakes confrontation hook.",
+      "observation": "Achieved 850 views, 7.4% CTR, and 64.2% retention.",
+      "reasoning": "",
+      "rule_added": "Maintain baseline pacing for revenge.",
+      "confidence_score": 0.85
+    },
+    {
+      "id": "exp_004_202609301506",
+      "timestamp": "2026-09-30T15:06:01.973594+00:00",
+      "hypothesis": "Testing drama story from r/AmItheAsshole with Direct stakes confrontation hook.",
+      "observation": "Achieved 850 views, 7.4% CTR, and 64.2% retention.",
+      "reasoning": "",
+      "rule_added": "Maintain baseline pacing for drama.",
+      "confidence_score": 0.85
+    },
+    {
+      "id": "exp_005_202609301539",
+      "timestamp": "2026-09-30T15:39:24.840520+00:00",
+      "hypothesis": "Testing drama story from r/AmItheAsshole with Direct stakes confrontation hook.",
+      "observation": "Achieved 850 views, 7.4% CTR, and 64.2% retention.",
+      "reasoning": "",
+      "rule_added": "Maintain baseline pacing for drama.",
+      "confidence_score": 0.85
+    }
+  ],
+  "channel_stats_summary": {
+    "total_analyzed_videos": 0,
+    "avg_ctr_percent": 6.8,
+    "avg_retention_percent": 62.5,
+    "top_performing_category": "revenge"
+  }
+}

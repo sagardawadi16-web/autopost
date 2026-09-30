@@ -8,33 +8,41 @@ jobs:
   generate-and-upload:
     runs-on: ubuntu-latest
     timeout-minutes: 60
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: '3.12'
           cache: 'pip'
       - name: Install system dependencies
         run: sudo apt-get update && sudo apt-get install -y ffmpeg
       - name: Install Python dependencies
         run: pip install -r requirements.txt
-      - name: Run pipeline
+      - name: Run AutoPost Pipeline
         env:
-          REDDIT_CLIENT_ID: ${{ secrets.REDDIT_CLIENT_ID }}
-          REDDIT_CLIENT_SECRET: ${{ secrets.REDDIT_CLIENT_SECRET }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           YOUTUBE_CLIENT_ID: ${{ secrets.YT_CLIENT_ID }}
           YOUTUBE_CLIENT_SECRET: ${{ secrets.YT_CLIENT_SECRET }}
           YT_HI_REFRESH_TOKEN: ${{ secrets.YT_HI_REFRESH_TOKEN }}
-          R2_ACCESS_KEY: ${{ secrets.R2_ACCESS_KEY }}
-          R2_SECRET_KEY: ${{ secrets.R2_SECRET_KEY }}
           CHANNEL: hindi
-        run: python -m src.pipeline --channel hindi
-      - name: Update story cache
+        run: python -m src.pipeline --channel hindi --format shorts
+      - name: Upload Generated Video & Thumbnail Artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: hindi-shorts-output
+          path: |
+            output/video/*.mp4
+            output/thumbnails/*.jpg
+          retention-days: 14
+      - name: Persist Evolution Memory and Story Cache
+        if: always()
         run: |
-          git config user.name 'AutoPost Bot'
-          git config user.email 'bot@autopost.local'
-          git add data/used_stories.json data/upload_log.json
-          git diff --staged --quiet || git commit -m 'Update story cache and upload log'
-          git push
+          git config user.name 'github-actions[bot]'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
+          git add data/learning_memory.json data/used_stories.json data/upload_log.json 2>/dev/null || true
+          git diff --staged --quiet || (git commit -m 'chore: evolve channel strategy and update cache [skip ci]' && git push)
+

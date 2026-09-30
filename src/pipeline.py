@@ -380,6 +380,11 @@ def main() -> None:
         action="store_true",
         help="Download and splice royalty-free parkour gameplay footage",
     )
+    parser.add_argument(
+        "--authorize",
+        action="store_true",
+        help="Run interactive YouTube OAuth setup for the specified channel",
+    )
 
     args = parser.parse_args()
 
@@ -393,6 +398,11 @@ def main() -> None:
         downloader = GameplayDownloader()
         downloader.ensure_gameplay_clips(min_clips=2)
         print("Gameplay footage downloaded and spliced successfully into assets/gameplay/")
+        sys.exit(0)
+
+    if args.authorize:
+        from src.uploader.authorize_channel import authorize_channel
+        authorize_channel(channel=args.channel)
         sys.exit(0)
 
     pipeline = AutomationPipeline(channel=args.channel, dry_run=args.dry_run)

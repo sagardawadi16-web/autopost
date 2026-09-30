@@ -1,7 +1,10 @@
 __pycache__/
 *.pyc
 .env
-data/
+data/*
+!data/learning_memory.json
+!data/used_stories.json
+!data/upload_log.json
 output/
 assets/gameplay/
 *.mp4
