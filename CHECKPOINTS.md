@@ -136,6 +136,22 @@
 - [x] **Checkpoint 6.4**: End-to-End Live Terminal Run & Verification
   - Verified 3/3 streams successfully generated and orchestrated via `python -m src.daily_powerhouse_runner` with zero crashes and real-time evolution updates.
 
+
+---
+
+## 🎨 Project 7: Ghibli Channel Isolation, Anti-Duplication & Subtitle Suppression (Status: Complete ✅)
+
+### Phase 1: Problem Resolution & Architecture Alignment
+- [x] **Checkpoint 7.1**: Ghibli Channel Isolation & Delegation (`src/pipeline.py`, `src/daily_powerhouse_runner.py`)
+  - `--channel ghibli` delegates directly to `GhibliPipeline` (authentic Hayao Miyazaki watercolor nostalgia stories).
+  - Stream target channels isolated: `ghibli_stream` -> `ghibli`, `hindi_reddit_stream` -> `hindi`, `english_reddit_stream` -> `english`. Prevents cross-posting Hindi Reddit stories to Ghibli channel.
+- [x] **Checkpoint 7.2**: Anti-Duplication Engine (`src/scraper/story_cache.py`, `story_fetcher.py`, `story_selector.py`)
+  - Added `is_title_used()` and `get_recent_titles()` to `StoryCache`.
+  - Expanded fallback viral story bank to 15+ stories across all categories; injected recent used titles into Gemini prompts to prevent duplicate story generation.
+- [x] **Checkpoint 7.3**: Subtitle & Text Overlay Suppression (`src/pipeline.py`, `src/ghibli_pipeline.py`, `src/video/assembler.py`)
+  - Disabled subtitle burn-in by default (`burn_subtitles=False` / `subtitles_ass=None`).
+  - Updated `VideoAssembler.assemble_longform()` to support optional subtitles without FFmpeg filter errors.
+
 ---
 
 ## 🛡️ Anti-Drift Quality Gates
@@ -151,6 +167,7 @@
 | **YouTube Schedule Gate** | `CheckpointGuard.verify_schedule_checkpoint()` | Verifies YouTube API private status and valid future publishAt timestamp. |
 | **LLM Quota Gate** | `MultiProviderGateway.verify_failover()` | Primary user API key touched strictly last; zero crash on 429. |
 | **Analytics Feedback Gate**| `AnalyticsCollector.sync_and_evolve()` | Video stats collected and learning weights dynamically updated. |
+
 
 
 

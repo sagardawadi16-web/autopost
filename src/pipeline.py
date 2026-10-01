@@ -505,9 +505,9 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="AutoPost: Automated YouTube Channel Pipeline")
     parser.add_argument(
         "--channel",
-        choices=["english", "hindi"],
+        choices=["english", "hindi", "ghibli"],
         default="english",
-        help="Target channel language (default: english)",
+        help="Target channel language/mode (default: english)",
     )
     parser.add_argument(
         "--format",
@@ -593,6 +593,17 @@ def main() -> None:
     if args.authorize:
         from src.uploader.authorize_channel import authorize_channel
         authorize_channel(channel=args.channel)
+        sys.exit(0)
+
+    if args.channel == "ghibli":
+        logger.info("🎬 Channel 'ghibli' requested! Initiating Ghibli Studio Pipeline...")
+        from src.ghibli_pipeline import GhibliPipeline
+        g_pipe = GhibliPipeline(dry_run=args.dry_run, privacy=args.privacy)
+        g_pipe.run(
+            is_shorts=(args.format == "shorts"),
+            burn_subtitles=False,
+            upload=not args.dry_run,
+        )
         sys.exit(0)
 
     pipeline = AutomationPipeline(
