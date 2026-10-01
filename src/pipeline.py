@@ -133,17 +133,19 @@ class AutomationPipeline:
         is_shorts: bool = False,
         multipart: bool = False,
         followup_id: Optional[str] = None,
+        burn_subtitles: bool = False,
     ) -> Dict[str, Any]:
-        """Execute full pipeline for long-form or Shorts content.
+        """Execute full pipeline for long-form or Shorts content."""
+        if self.channel == "ghibli":
+            logger.info("🎬 Channel 'ghibli' detected! Delegating to Ghibli Studio Pipeline...")
+            from src.ghibli_pipeline import GhibliPipeline
+            g_pipe = GhibliPipeline(dry_run=self.dry_run, privacy=self.privacy)
+            return g_pipe.run(
+                is_shorts=is_shorts,
+                burn_subtitles=burn_subtitles,
+                upload=not self.dry_run,
+            )
 
-        Args:
-            is_shorts: If True, produces a 9:16 vertical Short (< 60s).
-            multipart: If True, produces a linked multi-part story.
-            followup_id: If provided, generates the Part 2 follow-up for that story.
-
-        Returns:
-            Dictionary containing pipeline execution outputs and metrics.
-        """
         logger.info(f"=== Starting AutoPost Pipeline [Channel: {self.channel.upper()}, Format: {'Shorts' if is_shorts or followup_id else 'Long-Form'}, Dry-Run: {self.dry_run}] ===")
 
         # -------------------------------------------------------------
@@ -275,10 +277,10 @@ class AutomationPipeline:
         )
 
         # -------------------------------------------------------------
-        # 6. Karaoke Subtitle Generation (Omitted for Hindi Channel)
+        # 6. Karaoke Subtitle Generation (Omitted unless burn_subtitles is True)
         # -------------------------------------------------------------
-        if self.channel == "hindi":
-            logger.info("Hindi channel detected: Visual-first mode active. Omitting text subtitles.")
+        if not burn_subtitles:
+            logger.info("Subtitle burn-in disabled. Rendering clean video without subtitles/text.")
             subtitles_ass = None
         else:
             logger.info("Generating karaoke word-by-word ASS subtitles...")
@@ -414,12 +416,13 @@ class AutomationPipeline:
                 )
                 fetcher = StoryFetcher(reddit_client)
                 stories = fetcher.fetch_from_all_configured(limit=25)
-                used_ids = self.cache.get_used_ids()
+                # Exclude used IDs and used titles
+                filtered_stories = [s for s in stories if not self.cache.is_title_used(s.get("title", ""))]
 
                 if is_shorts:
-                    selected = self.selector.select_for_shorts(stories, count=1, exclude_ids=used_ids)
+                    selected = self.selector.select_for_shorts(filtered_stories or stories, count=1, exclude_ids=used_ids)
                 else:
-                    selected = self.selector.select_best(stories, count=1, exclude_ids=used_ids)
+                    selected = self.selector.select_best(filtered_stories or stories, count=1, exclude_ids=used_ids)
 
                 if selected:
                     return selected[0]
@@ -428,7 +431,7 @@ class AutomationPipeline:
 
         # Autonomous AI story synthesis (bypasses Reddit blocks completely, 0% copyright risk)
         ai_gen = AIStoryGenerator(api_key=os.environ.get("GEMINI_API_KEY"))
-        return ai_gen.generate_viral_story(target_word_count=150 if is_shorts else 1100)
+        return ai_gen.generate_viral_story(target_word_count=150 if is_shorts else 1100, cache=self.cache)
 
     def run_stage(self, stage: str, is_shorts: bool = False) -> Dict[str, Any]:
         """Execute an individual pipeline stage for testing and diagnostics.

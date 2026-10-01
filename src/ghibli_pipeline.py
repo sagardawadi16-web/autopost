@@ -85,7 +85,7 @@ class GhibliPipeline:
         is_shorts: bool = True,
         theme: Optional[str] = None,
         scenes: Optional[int] = None,
-        burn_subtitles: bool = True,
+        burn_subtitles: bool = False,
         upload: bool = False,
         upload_drive: bool = True,
     ) -> Dict[str, Any]:
