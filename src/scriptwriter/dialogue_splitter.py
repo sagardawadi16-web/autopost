@@ -75,6 +75,22 @@ class DialogueSplitter:
                 if not clean_text:
                     continue
 
+                # Prompt leak filter - ignore system instructions / prompt echo lines
+                prompt_leak_keywords = [
+                    "you are an award-winning",
+                    "original reddit story:",
+                    "active strategic directives:",
+                    "formatting requirements:",
+                    "critical requirements:",
+                    "generate the formatted script",
+                    "genre: ",
+                    "language: ",
+                    "critical fixes from previous rejection:",
+                ]
+                if any(kw in clean_text.lower() for kw in prompt_leak_keywords):
+                    logger.warning(f"Filtered out leaked prompt text: '{clean_text[:60]}...'")
+                    continue
+
                 char_type = self._classify_character(current_name, clean_text)
                 voice = self._assign_voice(char_type)
 

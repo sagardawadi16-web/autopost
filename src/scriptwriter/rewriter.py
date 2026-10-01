@@ -150,11 +150,47 @@ Body:
 Generate the formatted script now:
 """
 
-        return call_gemini_with_fallback(
+        raw_output = call_gemini_with_fallback(
             prompt=prompt,
             system_instruction=system_instructions,
             api_key=self.api_key,
         )
+        return self._clean_llm_script(raw_output)
+
+    @staticmethod
+    def _clean_llm_script(text: str) -> str:
+        """Strip any echoed system instructions or prompt boilerplate from LLM response."""
+        if not text:
+            return ""
+
+        # Lines to exclude if leaked into generated output
+        bad_keywords = [
+            "you are an award-winning youtube storyteller",
+            "original reddit story:",
+            "active strategic directives:",
+            "formatting requirements:",
+            "critical requirements:",
+            "generate the formatted script now:",
+            "genre: ",
+            "language: ",
+            "critical fixes from previous rejection:",
+        ]
+
+        cleaned_lines = []
+        for line in text.splitlines():
+            line_lower = line.strip().lower()
+            if any(kw in line_lower for kw in bad_keywords):
+                continue
+            cleaned_lines.append(line)
+
+        result = "\n".join(cleaned_lines).strip()
+
+        # If [NARRATOR] exists, strip any preamble text before the first tag
+        first_tag_pos = re.search(r"\[(NARRATOR|CHARACTER)", result, re.IGNORECASE)
+        if first_tag_pos and first_tag_pos.start() > 0:
+            result = result[first_tag_pos.start():].strip()
+
+        return result
 
     def _generate_heuristic(
         self,
