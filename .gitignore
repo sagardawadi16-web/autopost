@@ -72,6 +72,7 @@ test_*
 
 assets/gameplay/*
 !assets/gameplay/.gitkeep
+!assets/gameplay/minecraft_parkour_01.mp4
 assets/audio/*
 !assets/audio/.gitkeep
 assets/images/*
