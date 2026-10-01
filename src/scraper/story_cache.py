@@ -84,6 +84,30 @@ class StoryCache:
         with self._lock:
             return story_id in self._cache
 
+    def is_title_used(self, title: str) -> bool:
+        """Check if a story title or similar title has already been used.
+
+        Args:
+            title: Story title to check.
+
+        Returns:
+            True if a matching or near-matching title was used.
+        """
+        clean_target = " ".join(title.lower().split())
+        with self._lock:
+            for meta in self._cache.values():
+                used_title = " ".join(meta.get("title", "").lower().split())
+                if used_title and (clean_target in used_title or used_title in clean_target):
+                    return True
+        return False
+
+    def get_recent_titles(self, limit: int = 25) -> list[str]:
+        """Retrieve recent used story titles to pass to LLM generators for anti-duplication."""
+        with self._lock:
+            titles = [meta.get("title", "") for meta in self._cache.values() if meta.get("title")]
+            return titles[-limit:]
+
+
     def mark_used(
         self,
         story_id: str,
