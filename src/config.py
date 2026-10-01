@@ -88,6 +88,25 @@ REDDIT_USER_AGENT: str = os.environ.get("REDDIT_USER_AGENT", "autopost:v1.0.0 (b
 
 GEMINI_API_KEY: Optional[str] = os.environ.get("GEMINI_API_KEY", None)
 
+# Alternative Zero-Cost & Multi-Provider LLM Keys
+GROQ_API_KEY: Optional[str] = os.environ.get("GROQ_API_KEY", None)
+OPENROUTER_API_KEY: Optional[str] = os.environ.get("OPENROUTER_API_KEY", None)
+CF_API_TOKEN: Optional[str] = os.environ.get("CF_API_TOKEN", None)
+CF_ACCOUNT_ID: Optional[str] = os.environ.get("CF_ACCOUNT_ID", None)
+
+def _get_gemini_backup_keys() -> List[str]:
+    keys: List[str] = []
+    raw = os.environ.get("GEMINI_BACKUP_KEYS", "")
+    if raw:
+        keys.extend([k.strip() for k in raw.split(",") if k.strip()])
+    for i in range(2, 10):
+        k = os.environ.get(f"GEMINI_API_KEY_{i}")
+        if k and k.strip() and k.strip() not in keys:
+            keys.append(k.strip())
+    return keys
+
+GEMINI_BACKUP_KEYS: List[str] = _get_gemini_backup_keys()
+
 YOUTUBE_CLIENT_ID: Optional[str] = os.environ.get("YOUTUBE_CLIENT_ID", None)
 YOUTUBE_CLIENT_SECRET: Optional[str] = os.environ.get("YOUTUBE_CLIENT_SECRET", None)
 YT_EN_REFRESH_TOKEN: Optional[str] = os.environ.get("YT_EN_REFRESH_TOKEN") or os.environ.get("YT_ENGLISH_REFRESH_TOKEN")
@@ -161,7 +180,7 @@ class EnglishVoiceConfig:
         child: Voice profile for child characters.
     """
 
-    narrator: str = "en-US-GuyNeural"
+    narrator: str = "en-US-ChristopherNeural"
     narrator_female: str = "en-US-JennyNeural"
     young_male: str = "en-US-ChristopherNeural"
     young_female: str = "en-US-AriaNeural"

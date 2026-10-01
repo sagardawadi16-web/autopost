@@ -14,10 +14,14 @@ import sys
 from pathlib import Path
 from typing import Optional
 
-from google_auth_oauthlib.flow import InstalledAppFlow
-from googleapiclient.discovery import build
+# Ensure repository root is in sys.path regardless of where python is executed from
+_repo_root = Path(__file__).resolve().parent.parent.parent
+if str(_repo_root) not in sys.path:
+    sys.path.insert(0, str(_repo_root))
 
 import src.config  # Automatically loads .env file
+from google_auth_oauthlib.flow import InstalledAppFlow
+from googleapiclient.discovery import build
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 logger = logging.getLogger(__name__)
@@ -26,6 +30,7 @@ YOUTUBE_SCOPES = [
     "https://www.googleapis.com/auth/youtube.upload",
     "https://www.googleapis.com/auth/youtube",
     "https://www.googleapis.com/auth/youtube.readonly",
+    "https://www.googleapis.com/auth/drive.file",
 ]
 
 

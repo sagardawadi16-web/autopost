@@ -29,7 +29,10 @@ logging.basicConfig(
     format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
     datefmt="%Y-%m-%d %H:%M:%S",
 )
-logger = logging.getLogger("ghibli.pipeline")
+logger = logging.getLogger(__name__)
+_repo_root = Path(__file__).resolve().parent.parent
+if str(_repo_root) not in sys.path:
+    sys.path.insert(0, str(_repo_root))
 
 from src.config import (
     GEMINI_API_KEY,
@@ -40,10 +43,12 @@ from src.config import (
     get_channel_config,
 )
 from src.ghibli.cinematic_motion import CinematicMotionEngine
+from src.ghibli.flow_director import FlowNarrativeDirector
 from src.ghibli.soundscape_engine import SoundscapeEngine
-from src.ghibli.story_director import GhibliStory, StoryDirector
+from src.ghibli.story_director import GhibliStory
 from src.ghibli.subtitle_styler import GhibliSubtitleStyler
 from src.ghibli.visual_engine import VisualEngine
+from src.uploader.drive_uploader import GoogleDriveUploader
 from src.uploader.youtube_auth import YouTubeAuth
 from src.uploader.youtube_upload import YouTubeUploader
 from src.utils import get_ffmpeg_cmd
@@ -57,12 +62,13 @@ class GhibliPipeline:
         self.privacy = (privacy or YOUTUBE_SETTINGS.default_privacy_status or "public").lower()
         ensure_directories()
 
-        self.director = StoryDirector(api_key=GEMINI_API_KEY)
+        self.director = FlowNarrativeDirector(api_key=GEMINI_API_KEY)
         self.visual = VisualEngine()
         self.motion = CinematicMotionEngine()
         self.sound = SoundscapeEngine()
         self.subtitles = GhibliSubtitleStyler()
         self.ffmpeg_cmd = get_ffmpeg_cmd()
+        self.drive = GoogleDriveUploader()
 
         # YouTube uploader initialization for Ghibli channel
         self.uploader = None
@@ -81,6 +87,7 @@ class GhibliPipeline:
         scenes: Optional[int] = None,
         burn_subtitles: bool = True,
         upload: bool = False,
+        upload_drive: bool = True,
     ) -> Dict[str, Any]:
         """Execute complete automated production lifecycle.
 
@@ -90,6 +97,7 @@ class GhibliPipeline:
             scenes: Optional custom scene count.
             burn_subtitles: Whether to burn warm ASS subtitles into the video.
             upload: Whether to upload to YouTube immediately.
+            upload_drive: Whether to upload to Google Drive for phone sharing.
 
         Returns:
             Dictionary containing paths to output video, thumbnail, and metadata.
@@ -99,11 +107,11 @@ class GhibliPipeline:
         logger.info(f"=== Starting Ghibli Studio Production [{format_name}, ID: {run_id}] ===")
 
         # -------------------------------------------------------------
-        # Step 1: Script & Storyboard Formulation
+        # Step 1: Script & Storyboard Formulation (Google Flow AI)
         # -------------------------------------------------------------
-        scene_count = scenes or (5 if is_shorts else 8)
-        story: GhibliStory = self.director.generate_story(
-            topic=theme,
+        scene_count = scenes or (4 if is_shorts else 6)
+        story: GhibliStory = self.director.generate_flow_story(
+            theme=theme,
             is_shorts=is_shorts,
             scene_count=scene_count,
         )
@@ -209,7 +217,7 @@ class GhibliPipeline:
             raise RuntimeError(f"FFmpeg compositing failed: {res.stderr[:200]}")
 
         # -------------------------------------------------------------
-        # Step 5: Thumbnail Generation
+        # Step 5: Thumbnail & Social Media Caption Export
         # -------------------------------------------------------------
         thumbnail_path = OUTPUT_DIR / "ghibli" / f"{run_id}_thumbnail.jpg"
         # Generate 16:9 thumbnail frame for YouTube
@@ -219,7 +227,25 @@ class GhibliPipeline:
             is_shorts=False,
         ).rename(thumbnail_path)
 
+        # Generate copy-paste captions for Instagram Reels & TikTok
+        social_pack_path = OUTPUT_DIR / "ghibli" / f"{run_id}_social_pack.txt"
+        with open(social_pack_path, "w", encoding="utf-8") as f:
+            f.write("==================================================\n")
+            f.write("📸 INSTAGRAM REELS CAPTION (COPY & PASTE)\n")
+            f.write("==================================================\n\n")
+            f.write(f"✨ {story.title}\n\n")
+            f.write(f"{story.description}\n\n")
+            f.write("#ghibli #ghiblistyle #90skids #indianvillage #monsoon #rainasmr #cozyvibes #nostalgia #reelsindia #reels\n\n")
+            f.write("==================================================\n")
+            f.write("🎵 TIKTOK CAPTION (COPY & PASTE)\n")
+            f.write("==================================================\n\n")
+            f.write(f"{story.thumbnail_hook} 🌧️ 90s village nostalgia\n\n")
+            f.write("#fyp #ghibli #nostalgia #90s #indianvillage #asmr #rain #cozy #viral\n\n")
+            f.write("==================================================\n")
+            f.write("💡 Pro-Tip: In Instagram/TikTok, you can keep original voice audio or search & pair with 'Studio Ghibli Lofi' sound for 3x algorithmic reach.\n")
+
         logger.info(f"🎉 Production Complete! Final Video: {final_video.name} ({final_video.stat().st_size / (1024*1024):.2f} MB)")
+        logger.info(f"📋 Social copy-paste pack saved: {social_pack_path.name}")
 
         # -------------------------------------------------------------
         # Step 6: YouTube Upload (if enabled and authenticated)
@@ -233,6 +259,8 @@ class GhibliPipeline:
                     title=story.title,
                     description=story.description,
                     tags=story.tags,
+                    hashtags=["#ghibli", "#nostalgia", "#90skids", "#rainasmr", "#shorts"],
+                    thumbnail_text=story.thumbnail_hook or "वो बारिश का दिन...",
                     category_id=24,
                 )
                 upload_res = self.uploader.upload_video(
@@ -248,6 +276,23 @@ class GhibliPipeline:
             except Exception as e:
                 logger.error(f"YouTube upload error: {e}")
 
+        # -------------------------------------------------------------
+        # Step 7: Google Drive Auto-Upload (Ready for Instagram & TikTok on phone)
+        # -------------------------------------------------------------
+        drive_link = None
+        if (upload_drive or upload) and not self.dry_run:
+            try:
+                drive_package = self.drive.upload_package(
+                    video_path=final_video,
+                    thumbnail_path=thumbnail_path,
+                    social_pack_path=social_pack_path,
+                    folder_name="Ghibli Studio Posts",
+                )
+                drive_link = drive_package.get("folder_link")
+                logger.info(f"📱 Ready on your phone in Google Drive! Folder: {drive_link}")
+            except Exception as e:
+                logger.info(f"Google Drive auto-upload note (will upload when Google token is active): {e}")
+
         return {
             "run_id": run_id,
             "title": story.title,
@@ -256,6 +301,7 @@ class GhibliPipeline:
             "video_path": str(final_video.resolve()),
             "thumbnail_path": str(thumbnail_path.resolve()),
             "video_id": video_id,
+            "drive_link": drive_link,
             "duration": target_video_duration,
         }
 

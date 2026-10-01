@@ -102,21 +102,37 @@ class MusicMixer:
             if candidates:
                 return candidates[0]
 
-        # Procedurally synthesize a subtle cinematic dark ambient drone using FFmpeg
+        # Procedurally synthesize cinematic ambient soundscape using FFmpeg
+        dur = max(60, int(duration_sec + 5))
         procedural_path = self.music_dir / f"ambient_{category}_tone.mp3"
         if not procedural_path.exists():
-            logger.info("No audio tracks found in assets/audio; generating procedural ambient drone...")
-            freq = "55" if category == "horror" else ("65" if category == "drama" else "75")
-            gen_cmd = [
-                get_ffmpeg_cmd(),
-                "-y",
-                "-f", "lavfi",
-                "-i", f"sine=frequency={freq}:duration=60",
-                "-filter_complex",
-                "lowpass=f=200,volume=0.3",
-                "-c:a", "libmp3lame",
-                str(procedural_path),
-            ]
+            logger.info(f"Generating procedural {category} soundscape...")
+            if category in ("horror", "creepy", "nosleep"):
+                # Multi-layer scary soundscape: pulsing bass heartbeat + eerie brown-noise wind + tension resonance
+                gen_cmd = [
+                    get_ffmpeg_cmd(),
+                    "-y",
+                    "-f", "lavfi", "-i", f"sine=frequency=42:duration={dur},tremolo=f=1.1:d=0.95,volume=0.35",
+                    "-f", "lavfi", "-i", f"anoisesrc=d={dur}:c=brown:r=44100:a=0.08,lowpass=f=180,volume=0.25",
+                    "-f", "lavfi", "-i", f"sine=frequency=220:duration={dur},volume=0.03,flanger=delay=5:depth=2",
+                    "-filter_complex", "amix=inputs=3:duration=first",
+                    "-c:a", "libmp3lame",
+                    "-b:a", "192k",
+                    str(procedural_path),
+                ]
+            else:
+                freq = "65" if category == "drama" else "75"
+                gen_cmd = [
+                    get_ffmpeg_cmd(),
+                    "-y",
+                    "-f", "lavfi",
+                    "-i", f"sine=frequency={freq}:duration={dur}",
+                    "-filter_complex",
+                    "lowpass=f=200,volume=0.3",
+                    "-c:a", "libmp3lame",
+                    "-b:a", "192k",
+                    str(procedural_path),
+                ]
             try:
                 subprocess.run(gen_cmd, capture_output=True, text=True, check=True)
             except Exception as e:

@@ -53,6 +53,8 @@ class SEOGenerator:
         category: str = "general",
         language: str = "english",
         is_shorts: bool = False,
+        part_number: Optional[int] = None,
+        total_parts: Optional[int] = None,
     ) -> VideoMetadata:
         """Generate high-performing title, description, tags, and thumbnail text.
 
@@ -61,6 +63,8 @@ class SEOGenerator:
             category: Genre/mood ('horror', 'drama', 'revenge', etc.).
             language: Target language ('english' or 'hindi').
             is_shorts: True if targeting Shorts format.
+            part_number: Optional 1 or 2 for multi-part series.
+            total_parts: Total parts in series.
 
         Returns:
             VideoMetadata object ready for YouTube Data API.
@@ -70,11 +74,15 @@ class SEOGenerator:
 
         if self.api_key:
             try:
-                return self._generate_with_gemini(raw_title, subreddit, category, language, is_shorts)
+                return self._generate_with_gemini(
+                    raw_title, subreddit, category, language, is_shorts, part_number, total_parts
+                )
             except Exception as e:
                 logger.warning(f"Gemini SEO generation error ({e}); using heuristic optimizer.")
 
-        return self._generate_heuristic(raw_title, subreddit, category, language, is_shorts)
+        return self._generate_heuristic(
+            raw_title, subreddit, category, language, is_shorts, part_number, total_parts
+        )
 
     def _generate_with_gemini(
         self,
@@ -83,6 +91,8 @@ class SEOGenerator:
         category: str,
         language: str,
         is_shorts: bool,
+        part_number: Optional[int] = None,
+        total_parts: Optional[int] = None,
     ) -> VideoMetadata:
         """Generate metadata using Gemini LLM."""
         from src.utils import call_gemini_with_fallback
@@ -122,18 +132,38 @@ Return ONLY valid JSON:
         text = re.sub(r"^```(?:json)?", "", text)
         text = re.sub(r"```$", "", text).strip()
         import json
-        data = json.loads(text)
-
         title = data.get("title", raw_title)[:SEO_SETTINGS.max_title_length]
+
+        if part_number is not None:
+            part_tag = f"[Part {part_number}]" if not total_parts else f"[Part {part_number}/{total_parts}]"
+            if "part" not in title.lower():
+                title = f"{title} {part_tag}"
+
         if is_shorts and "#Shorts" not in title:
-            title = f"{title} #Shorts"
+            title = f"{title[:85]} #Shorts"
+
+        thumb_text = data.get("thumbnail_text", "UNBELIEVABLE")[:30]
+        if part_number is not None:
+            thumb_text = f"PART {part_number}"
+
+        followup_note = ""
+        if part_number == 1:
+            followup_note = "👉 Part 1 of 2. Subscribe and check the pinned comment for Part 2!\n\n"
+        elif part_number == 2:
+            followup_note = "⚡ Part 2 (Conclusion)! Watch Part 1 on our channel if you missed the setup.\n\n"
+
+        description = f"{followup_note}{data.get('description', '')}"[:SEO_SETTINGS.max_description_length]
+
+        tags = data.get("tags", list(SEO_SETTINGS.default_tags))[:SEO_SETTINGS.max_tags]
+        if part_number:
+            tags.extend([f"part {part_number}", "part 1", "part 2", "series"])
 
         return VideoMetadata(
             title=title,
-            description=data.get("description", "")[:SEO_SETTINGS.max_description_length],
-            tags=data.get("tags", SEO_SETTINGS.default_tags)[:SEO_SETTINGS.max_tags],
+            description=description,
+            tags=tags[:SEO_SETTINGS.max_tags],
             hashtags=data.get("hashtags", ["#redditstories", "#storytime", "#viral"])[:SEO_SETTINGS.hashtag_count],
-            thumbnail_text=data.get("thumbnail_text", "UNBELIEVABLE")[:30],
+            thumbnail_text=thumb_text,
         )
 
     def _generate_heuristic(
@@ -143,38 +173,59 @@ Return ONLY valid JSON:
         category: str,
         language: str,
         is_shorts: bool,
+        part_number: Optional[int] = None,
+        total_parts: Optional[int] = None,
     ) -> VideoMetadata:
         """Deterministic heuristic metadata generator."""
         # Clean title of Reddit specific jargon (e.g. [UPDATE], AITA, etc.)
         clean_title = re.sub(r"\[.*?\]|\(.*?\)", "", raw_title).strip()
         clean_title = re.sub(r"\s+", " ", clean_title)
 
-        if len(clean_title) > 65:
-            clean_title = clean_title[:62] + "..."
+        if len(clean_title) > 60:
+            clean_title = clean_title[:57] + "..."
 
         if category == "horror":
-            title = f"The Scariest Thing Happened: {clean_title}"
+            base = f"The Scariest Thing Happened: {clean_title}"
             thumb_text = "DON'T LOOK"
         elif category == "revenge":
-            title = f"Entitled Person Demanded Everything: {clean_title}"
+            base = f"Entitled Person Demanded Everything: {clean_title}"
             thumb_text = "INSTANT REGRET"
         elif category == "drama":
-            title = f"I Couldn't Believe What They Did: {clean_title}"
+            base = f"I Couldn't Believe What They Did: {clean_title}"
             thumb_text = "THEY CONFESSED"
         else:
-            title = f"Unbelievable Reddit Story: {clean_title}"
+            base = f"Unbelievable Reddit Story: {clean_title}"
             thumb_text = "WHAT HAPPENED"
 
-        if len(title) > SEO_SETTINGS.max_title_length:
-            title = title[:SEO_SETTINGS.max_title_length - 3] + "..."
+        part_tag = f"[Part {part_number}]" if part_number else ""
+        shorts_tag = "#Shorts" if is_shorts else ""
 
-        if is_shorts:
-            title = f"{title[:85]} #Shorts"
+        # Reserve space for part_tag and shorts_tag so they are never truncated
+        tags_overhead = len(f" {part_tag} {shorts_tag}".strip())
+        max_base_len = max(30, 85 - tags_overhead)
+        if len(base) > max_base_len:
+            base = base[:max_base_len - 3].rstrip() + "..."
+
+        title_parts = [base]
+        if part_tag:
+            title_parts.append(part_tag)
+            thumb_text = f"PART {part_number}"
+        if shorts_tag:
+            title_parts.append(shorts_tag)
+
+        title = " ".join(title_parts)
 
         hashtags = ["#redditstories", f"#{category}", "#viral", "#shorts"] if is_shorts else ["#redditstories", f"#{category}", "#storytime"]
 
+        followup_note = ""
+        if part_number == 1:
+            followup_note = "👉 Part 1 of 2. Subscribe and check the pinned comment for Part 2!\n\n"
+        elif part_number == 2:
+            followup_note = "⚡ Part 2 (Conclusion)! Watch Part 1 on our channel if you missed the setup.\n\n"
+
         description = (
             f"{title}\n\n"
+            f"{followup_note}"
             f"An incredible story from r/{subreddit}. What would you have done in this situation? "
             f"Share your thoughts in the comments below!\n\n"
             f"🔔 Subscribe for daily stories and updates.\n\n"
@@ -182,6 +233,8 @@ Return ONLY valid JSON:
         )
 
         tags = list(SEO_SETTINGS.default_tags) + [category, subreddit.lower(), "reddit confessions", "scary stories"]
+        if part_number:
+            tags.extend([f"part {part_number}", "part 1", "part 2", "series"])
 
         return VideoMetadata(
             title=title,

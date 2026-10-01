@@ -202,6 +202,11 @@ class StrategicLearningMemory:
         with self._lock:
             return self._data.get("niche_weights", {}).get(subreddit, 1.0)
 
+    def get_all_niche_weights(self) -> Dict[str, float]:
+        """Get copy of all current niche weights."""
+        with self._lock:
+            return dict(self._data.get("niche_weights", {}))
+
     def get_rewriter_directives(self, category: str, language: str) -> List[str]:
         """Synthesize active, learned directives to inject into the AI scriptwriter prompt.
 
@@ -248,6 +253,52 @@ class StrategicLearningMemory:
             styles = self._data.get("winning_thumbnail_styles", {})
             return styles.get(category, styles.get("horror", {}))
 
+    def record_voice_performance(
+        self,
+        voice_id: str,
+        views: int,
+        retention_pct: float,
+        language: str = "english",
+    ) -> None:
+        """Update voice performance memory based on post-upload analytics."""
+        with self._lock:
+            voices = self._data.setdefault("voice_performance", {})
+            current = voices.setdefault(voice_id, {
+                "total_views": 0,
+                "video_count": 0,
+                "avg_retention_pct": 60.0,
+                "language": language,
+                "weight": 1.0,
+            })
+            current["total_views"] += views
+            current["video_count"] += 1
+            # Rolling average retention
+            old_avg = current["avg_retention_pct"]
+            current["avg_retention_pct"] = round((old_avg * (current["video_count"] - 1) + retention_pct) / current["video_count"], 1)
+
+            # Evolve voice weight
+            if current["avg_retention_pct"] >= 65.0:
+                current["weight"] = round(min(2.5, current["weight"] + 0.1), 2)
+            elif current["avg_retention_pct"] < 45.0:
+                current["weight"] = round(max(0.3, current["weight"] - 0.15), 2)
+
+            self._save()
+            logger.info(f"Updated performance for voice '{voice_id}': {views} views, {current['avg_retention_pct']}% avg retention.")
+
+    def get_top_performing_voice(self, language: str = "english") -> str:
+        """Return the best performing voice based on historical retention and views."""
+        with self._lock:
+            voices = self._data.get("voice_performance", {})
+            candidates = {
+                vid: data for vid, data in voices.items()
+                if data.get("language", "english") == language
+            }
+            if not candidates:
+                return "en-US-ChristopherNeural" if language == "english" else "hi-IN-MadhurNeural"
+
+            best_vid = max(candidates, key=lambda k: candidates[k].get("weight", 1.0) * candidates[k].get("avg_retention_pct", 50.0))
+            return best_vid
+
     def get_full_evolution_summary(self) -> Dict[str, Any]:
         """Retrieve complete evolution stats for auditing."""
         with self._lock:
@@ -256,5 +307,6 @@ class StrategicLearningMemory:
                 "total_experiments": len(self._data.get("experiment_history", [])),
                 "latest_experiments": self._data.get("experiment_history", [])[-5:],
                 "niche_weights": self._data.get("niche_weights", {}),
+                "voice_performance": self._data.get("voice_performance", {}),
                 "winning_rules_count": len(self._data.get("winning_hook_patterns", [])),
             }

@@ -33,7 +33,7 @@ class ShortsMaker:
         self,
         background_video: Path,
         soundtrack_audio: Path,
-        subtitles_ass: Path,
+        subtitles_ass: Optional[Path],
         output_filename: str,
         duration_seconds: float,
     ) -> Path:
@@ -42,7 +42,7 @@ class ShortsMaker:
         Args:
             background_video: Prepared 1080x1920 vertical background.
             soundtrack_audio: Mixed narration and ambient track.
-            subtitles_ass: Styled ASS subtitle file.
+            subtitles_ass: Styled ASS subtitle file (Optional; None disables subtitles).
             output_filename: Name of the resulting Short MP4.
             duration_seconds: Duration in seconds (capped at 58.0s).
 
@@ -53,14 +53,18 @@ class ShortsMaker:
         effective_duration = min(duration_seconds, 58.0)
         output_mp4 = self.output_dir / f"{output_filename}_short.mp4"
 
-        clean_sub_path = str(subtitles_ass.resolve()).replace("\\", "/").replace(":", "\\:")
-
         cmd = [
             get_ffmpeg_cmd(),
             "-y",
             "-i", str(background_video),
             "-i", str(soundtrack_audio),
-            "-vf", f"ass='{clean_sub_path}'",
+        ]
+
+        if subtitles_ass is not None:
+            clean_sub_path = str(subtitles_ass.resolve()).replace("\\", "/").replace(":", "\\:")
+            cmd.extend(["-vf", f"ass='{clean_sub_path}'"])
+
+        cmd.extend([
             "-map", "0:v:0",
             "-map", "1:a:0",
             "-c:v", VIDEO_SETTINGS.video_codec,
@@ -71,7 +75,7 @@ class ShortsMaker:
             "-b:a", VIDEO_SETTINGS.audio_bitrate,
             "-t", str(effective_duration),
             str(output_mp4),
-        ]
+        ])
 
         logger.info(f"Rendering YouTube Short '{output_mp4.name}' ({effective_duration:.1f}s)...")
         try:

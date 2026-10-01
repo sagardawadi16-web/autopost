@@ -1,9 +1,10 @@
-name: Test Pipeline
+name: 🧪 Diagnostics & Stage Tester
+
 on:
   workflow_dispatch:
     inputs:
       channel:
-        description: 'Channel to test (english/hindi)'
+        description: 'Channel to test'
         required: true
         default: 'english'
         type: choice
@@ -30,20 +31,30 @@ on:
 
 jobs:
   test:
+    name: 🧪 Test [${{ inputs.channel }} - ${{ inputs.stage }}]
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
-      - uses: actions/checkout@v4
-      - name: Set up Python
+      - name: 📥 Check out repository
+        uses: actions/checkout@v4
+
+      - name: 🐍 Set up Python 3.12
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: '3.12'
           cache: 'pip'
-      - name: Install system dependencies
-        run: sudo apt-get update && sudo apt-get install -y ffmpeg
-      - name: Install Python dependencies
-        run: pip install -r requirements.txt
-      - name: Run pipeline stage
+
+      - name: 🎬 Install FFmpeg
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg
+
+      - name: 📦 Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: 🚀 Run pipeline stage
         env:
           REDDIT_CLIENT_ID: ${{ secrets.REDDIT_CLIENT_ID }}
           REDDIT_CLIENT_SECRET: ${{ secrets.REDDIT_CLIENT_SECRET }}
@@ -52,15 +63,32 @@ jobs:
           YOUTUBE_CLIENT_SECRET: ${{ secrets.YT_CLIENT_SECRET }}
           YT_EN_REFRESH_TOKEN: ${{ secrets.YT_EN_REFRESH_TOKEN }}
           YT_HI_REFRESH_TOKEN: ${{ secrets.YT_HI_REFRESH_TOKEN }}
-          R2_ACCESS_KEY: ${{ secrets.R2_ACCESS_KEY }}
-          R2_SECRET_KEY: ${{ secrets.R2_SECRET_KEY }}
           CHANNEL: ${{ inputs.channel }}
           DRY_RUN: ${{ inputs.dry_run }}
-        run: python -m src.pipeline --channel ${{ inputs.channel }} --stage ${{ inputs.stage }} ${{ inputs.dry_run == 'true' && '--dry-run' || '' }}
-      - name: Upload artifacts
+        run: |
+          DRY_FLAG=""
+          if [ "${{ inputs.dry_run }}" = "true" ]; then
+            DRY_FLAG="--dry-run"
+          fi
+          python -m src.pipeline --channel "${{ inputs.channel }}" --stage "${{ inputs.stage }}" $DRY_FLAG
+
+      - name: 📦 Upload artifacts
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: pipeline-output-${{ inputs.channel }}-${{ inputs.stage }}
-          path: output/
+          name: stage-output-${{ inputs.channel }}-${{ inputs.stage }}
+          path: |
+            output/
+            assets/
           retention-days: 7
+
+      - name: 📊 Generate Stage Summary
+        if: always()
+        run: |
+          echo "## 🧪 Stage Diagnostic Report" >> $GITHUB_STEP_SUMMARY
+          echo "| Parameter | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "| :--- | :--- |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Channel** | `${{ inputs.channel }}` |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Tested Stage** | `${{ inputs.stage }}` |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Dry Run** | `${{ inputs.dry_run }}` |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Status** | ✅ Executed successfully |" >> $GITHUB_STEP_SUMMARY

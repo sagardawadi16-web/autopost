@@ -81,7 +81,10 @@ def call_gemini_with_fallback(
     system_instruction: Optional[str] = None,
     api_key: Optional[str] = None,
 ) -> str:
-    """Invoke Gemini API trying preferred models with automatic failover.
+    """Invoke LLM with resilient multi-provider fallback.
+
+    Tier 1 keyless (Pollinations) is tried first to preserve user quota.
+    Primary user GEMINI_API_KEY is touched strictly as the last live resort.
 
     Args:
         prompt: User prompt content.
@@ -90,15 +93,26 @@ def call_gemini_with_fallback(
 
     Returns:
         Generated text response.
-
-    Raises:
-        Exception if all models fail.
     """
+    # 1. First attempt resilient MultiProviderGateway (Tier 1 Keyless -> Tier 2 Free -> Tier 3 Backup Keys)
+    try:
+        from src.llm.multi_provider_gateway import gateway
+        text, provider_name = gateway.generate_text(
+            prompt=prompt,
+            system_prompt=system_instruction,
+        )
+        if text and text.strip():
+            logger.info(f"Generated text response via '{provider_name}'.")
+            return text.strip()
+    except Exception as gw_err:
+        logger.warning(f"Gateway generation note: {gw_err}. Cascading to direct Gemini loop...")
+
+    # 2. Direct Gemini model loop if gateway was bypassed or explicitly requested
     import google.generativeai as genai
 
     key = api_key or os.environ.get("GEMINI_API_KEY")
     if not key:
-        raise ValueError("GEMINI_API_KEY is not configured.")
+        raise ValueError("GEMINI_API_KEY is not configured and gateway exhausted.")
 
     genai.configure(api_key=key)
 
@@ -117,7 +131,10 @@ def call_gemini_with_fallback(
             err_str = str(e)
             logger.warning(f"Model {model_name} encountered error: {err_str[:120]}... Trying next model.")
             last_error = e
-            time.sleep(1.0)
+            if "429" in err_str or "quota" in err_str.lower():
+                logger.warning("Gemini API quota exhausted (429). Fast-failing to offline fallback engine.")
+                raise e
+            time.sleep(0.5)
 
     if last_error:
         raise last_error

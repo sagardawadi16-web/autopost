@@ -12,6 +12,8 @@ import random
 from dataclasses import asdict, dataclass, field
 from typing import Any, Dict, List, Optional
 
+from src.llm.multi_provider_gateway import MultiProviderGateway
+
 logger = logging.getLogger(__name__)
 
 
@@ -168,6 +170,7 @@ class StoryDirector:
 
     def __init__(self, api_key: Optional[str] = None) -> None:
         self.api_key = api_key
+        self.gateway = MultiProviderGateway()
 
     def generate_story(
         self,
@@ -178,7 +181,15 @@ class StoryDirector:
         """Generate a complete Ghibli village story with timed scenes."""
         logger.info(f"Generating Ghibli story (Format: {'Shorts' if is_shorts else 'Long-Form'}, Scenes: {scene_count})...")
 
-        # Try Gemini LLM generation if API key is present
+        # Try resilient multi-provider gateway first (Pollinations keyless -> 3rd party free -> Gemini backup -> Gemini primary last)
+        try:
+            story = self._generate_with_gateway(topic=topic, is_shorts=is_shorts, scene_count=scene_count)
+            if story:
+                return story
+        except Exception as e:
+            logger.warning(f"Gateway story generation note ({e}), trying legacy or fallback...")
+
+        # Try direct Gemini LLM generation if API key is present
         if self.api_key:
             try:
                 story = self._generate_with_gemini(topic=topic, is_shorts=is_shorts, scene_count=scene_count)
@@ -212,6 +223,73 @@ class StoryDirector:
             full_narration=chosen["full_narration"],
             scenes=scenes,
         )
+
+    def _generate_with_gateway(
+        self,
+        topic: Optional[str],
+        is_shorts: bool,
+        scene_count: int,
+    ) -> Optional[GhibliStory]:
+        """Use MultiProviderGateway across tiers to craft an original Ghibli script."""
+        format_desc = "YouTube Short (35-50 seconds total, 4-5 scenes)" if is_shorts else f"Long-form Story ({scene_count} scenes, 3-5 minutes)"
+        prompt = f"""You are the creative director for a viral YouTube channel inspired by @GHIBLISTYLESTUDIO.
+The channel creates soul-healing, deeply nostalgic 90s Indian/South Asian village life stories with Studio Ghibli watercolor anime aesthetics and ASMR soundscapes.
+
+Format: {format_desc}
+Theme: {topic or 'Monsoon rain in 90s village, grandmother cooking on clay chulha, innocent childhood memories'}
+
+Generate a structured JSON output with:
+1. "title": Catchy, emotional Hindi/English title with emojis and #shorts if applicable.
+2. "description": Heartwarming video description with hashtags.
+3. "tags": 8-12 relevant tags.
+4. "thumbnail_hook": 3-4 word emotional Hindi hook for thumbnail.
+5. "full_narration": Complete soulful Hindi narration script.
+6. "scenes": Exactly {scene_count} timed scenes:
+   - "scene_index": 1, 2, ...
+   - "narration_chunk": The calm Hindi spoken line for this scene (1-2 sentences).
+   - "visual_prompt": Detailed Studio Ghibli anime scene prompt (e.g. 'Studio Ghibli style, peaceful 1990s Indian village during monsoon rain... Hayao Miyazaki watercolor aesthetic').
+   - "motion_type": One of: 'zoom_in', 'zoom_out', 'pan_left', 'pan_right'.
+   - "asmr_cue": One of: 'rain_light', 'rain_heavy', 'chulha_fire', 'chai_boil', 'village_morning', 'crickets_night'.
+   - "duration_seconds": Recommended scene duration between 5.5 and 7.5.
+"""
+        data, provider_name = self.gateway.generate_json(
+            prompt=prompt,
+            system_prompt="You are an expert anime director and Ghibli narrative designer. Respond strictly in valid JSON.",
+            temperature=0.72,
+        )
+
+        raw_scenes = data.get("scenes") or data.get("Scenes") or data.get("scene_list") or data.get("shots")
+        if not raw_scenes:
+            for val in data.values():
+                if isinstance(val, list) and len(val) > 0 and isinstance(val[0], dict):
+                    raw_scenes = val
+                    break
+        if not raw_scenes:
+            raise ValueError(f"JSON response from {provider_name} missing scenes list.")
+
+        scenes = [
+            GhibliScene(
+                scene_index=s.get("scene_index", idx),
+                narration_chunk=s.get("narration_chunk") or s.get("narration") or s.get("voiceover") or s.get("text", ""),
+                visual_prompt=s.get("visual_prompt") or s.get("prompt") or s.get("image_prompt", "Studio Ghibli style cozy village"),
+                motion_type=s.get("motion_type", "zoom_in"),
+                asmr_cue=s.get("asmr_cue", "rain_light"),
+                duration_seconds=float(s.get("duration_seconds", 6.5)),
+            )
+            for idx, s in enumerate(raw_scenes, start=1)
+        ]
+
+        story = GhibliStory(
+            title=data.get("title", "90s के गांव की यादें"),
+            description=data.get("description", "A soulful Ghibli journey to 90s Indian village."),
+            tags=data.get("tags", ["ghibli", "nostalgia", "village"]),
+            thumbnail_hook=data.get("thumbnail_hook", "वो सादा बचपन..."),
+            full_narration=data.get("full_narration", " ".join(s.narration_chunk for s in scenes)),
+            scenes=scenes,
+        )
+
+        logger.info(f"✅ [StoryDirector] Synthesized original story via '{provider_name}'!")
+        return story
 
     def _generate_with_gemini(
         self,

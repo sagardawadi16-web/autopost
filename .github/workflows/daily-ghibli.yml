@@ -1,18 +1,18 @@
-name: Daily Hindi Video
+name: Daily Ghibli Studio Auto-Pilot
 
 on:
   schedule:
-    - cron: '0 13 * * *'  # ~6:45 PM Nepal time
+    - cron: '30 12 * * *'  # 6:15 PM Nepal Time daily
   workflow_dispatch:
     inputs:
       format:
-        description: 'Video format (shorts or longform)'
+        description: 'Video format (shorts or story)'
         required: false
         default: 'shorts'
         type: choice
         options:
           - shorts
-          - longform
+          - story
       privacy:
         description: 'YouTube visibility'
         required: false
@@ -22,6 +22,11 @@ on:
           - public
           - unlisted
           - private
+      theme:
+        description: 'Custom nostalgic theme prompt (optional)'
+        required: false
+        default: ''
+        type: string
       dry_run:
         description: 'Dry run (preview & download artifacts only, no upload)'
         required: false
@@ -29,8 +34,8 @@ on:
         type: boolean
 
 jobs:
-  generate-and-upload:
-    name: 🎬 Produce Daily Hindi Short
+  auto-generate-and-publish:
+    name: 🎨 Produce Daily Ghibli Nostalgia Video
     runs-on: ubuntu-latest
     timeout-minutes: 60
     permissions:
@@ -56,57 +61,57 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: 🚀 Run AutoPost Pipeline
+      - name: 🚀 Auto-Generate & Publish Ghibli Studio Video
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           YOUTUBE_CLIENT_ID: ${{ secrets.YT_CLIENT_ID }}
           YOUTUBE_CLIENT_SECRET: ${{ secrets.YT_CLIENT_SECRET }}
-          YT_HI_REFRESH_TOKEN: ${{ secrets.YT_HI_REFRESH_TOKEN }}
-          CHANNEL: hindi
+          YT_GHIBLI_REFRESH_TOKEN: ${{ secrets.YT_GHIBLI_REFRESH_TOKEN }}
         run: |
           FORMAT="${{ inputs.format || 'shorts' }}"
           PRIVACY="${{ inputs.privacy || 'public' }}"
+          THEME="${{ inputs.theme }}"
           DRY_RUN="${{ inputs.dry_run }}"
 
           DRY_RUN_FLAG=""
+          UPLOAD_FLAG="--upload"
           if [ "$DRY_RUN" = "true" ]; then
             DRY_RUN_FLAG="--dry-run"
+            UPLOAD_FLAG=""
           fi
 
-          python -m src.pipeline --channel hindi --format "$FORMAT" --privacy "$PRIVACY" $DRY_RUN_FLAG
+          THEME_FLAG=""
+          if [ -n "$THEME" ]; then
+            THEME_FLAG="--theme \"$THEME\""
+          fi
+
+          python -m src.ghibli_pipeline --type "$FORMAT" --privacy "$PRIVACY" $UPLOAD_FLAG $DRY_RUN_FLAG $THEME_FLAG
 
       - name: 📦 Upload Generated Video & Thumbnail Artifacts
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: hindi-shorts-output
+          name: ghibli-published-artifacts
           path: |
-            output/video/*.mp4
-            output/thumbnails/*.jpg
+            output/ghibli/*_final.mp4
+            output/ghibli/*_thumbnail.jpg
           retention-days: 14
 
       - name: 📊 Generate Summary Card
         if: always()
         run: |
           python -c '
-          import json, os
+          import os
           from pathlib import Path
 
-          log_file = Path("data/upload_log.json")
-          summary = ["## 🎬 Hindi Daily Video Report\n"]
-          if log_file.exists():
-            try:
-              data = json.loads(log_file.read_text(encoding="utf-8"))
-              if data:
-                last = data[-1]
-                summary.append(f"- **Title:** {last.get(\"title\", \"N/A\")}")
-                summary.append(f"- **Privacy:** `{last.get(\"privacy_status\", \"public\")}`")
-                if last.get("dry_run"):
-                  summary.append("- **Status:** 🧪 Simulation / Artifact preview")
-                else:
-                  summary.append(f"- **YouTube URL:** 🚀 [{last.get(\"url\")}]({last.get(\"url\")})")
-            except Exception:
-              pass
+          summary = ["## 🎨 Studio Ghibli Daily Video Report\n"]
+          ghibli_dir = Path("output/ghibli")
+          videos = list(ghibli_dir.glob("*_final.mp4")) if ghibli_dir.exists() else []
+          if videos:
+            last = sorted(videos, key=lambda f: f.stat().st_mtime)[-1]
+            size_mb = last.stat().st_size / (1024 * 1024)
+            summary.append(f"- **Rendered File:** `{last.name}` ({size_mb:.2f} MB)")
+            summary.append(f"- **Format:** Vertical Shorts (9:16)" if "shorts" in last.name else "- **Format:** 16:9 Landscape Story")
           summary.append("\n*Download the rendered video from the **Artifacts** section below.*")
           summary_path = os.environ.get("GITHUB_STEP_SUMMARY")
           if summary_path:
@@ -120,4 +125,4 @@ jobs:
           git config user.name 'github-actions[bot]'
           git config user.email 'github-actions[bot]@users.noreply.github.com'
           git add data/ 2>/dev/null || true
-          git diff --staged --quiet || (git commit -m 'chore: evolve channel strategy and update cache [skip ci]' && git push)
+          git diff --staged --quiet || (git commit -m 'chore: update channel evolution memory [skip ci]' && git push)

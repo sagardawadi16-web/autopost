@@ -90,3 +90,6 @@ desktop.ini
 node_modules/
 *.json.bak
 *.bak
+
+# Agent Internals & Scratch Logs
+.agents/

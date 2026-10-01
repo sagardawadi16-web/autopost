@@ -1,0 +1,243 @@
+name: 🎬 Produce & Publish Video (One-Click)
+
+on:
+  workflow_dispatch:
+    inputs:
+      channel:
+        description: 'Target Channel / Video Style'
+        required: true
+        default: 'english'
+        type: choice
+        options:
+          - english
+          - hindi
+          - ghibli
+          - comparison
+      format:
+        description: 'Video Format'
+        required: true
+        default: 'shorts'
+        type: choice
+        options:
+          - shorts
+          - longform
+      action_mode:
+        description: 'Action Mode (Publish to YouTube or Preview Artifact Only)'
+        required: true
+        default: 'publish'
+        type: choice
+        options:
+          - publish
+          - preview
+      privacy:
+        description: 'YouTube Visibility (if publishing)'
+        required: true
+        default: 'public'
+        type: choice
+        options:
+          - public
+          - unlisted
+          - private
+      theme:
+        description: 'Custom Topic / Theme Prompt (optional, leave blank for auto viral story)'
+        required: false
+        default: ''
+        type: string
+      multipart:
+        description: 'Generate 2-part linked series (Part 1 + Part 2)'
+        required: false
+        default: false
+        type: boolean
+
+jobs:
+  produce-video:
+    name: 🚀 Render & Publish [${{ inputs.channel }}]
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    permissions:
+      contents: write
+
+    steps:
+      - name: 📥 Check out repository
+        uses: actions/checkout@v4
+
+      - name: 🐍 Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: 🎬 Install FFmpeg and system dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg
+
+      - name: 📦 Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: 🔍 Pre-flight Credential & Environment Diagnostics
+        id: preflight
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          YT_CLIENT_ID: ${{ secrets.YT_CLIENT_ID }}
+          YT_CLIENT_SECRET: ${{ secrets.YT_CLIENT_SECRET }}
+          YT_EN_REFRESH_TOKEN: ${{ secrets.YT_EN_REFRESH_TOKEN }}
+          YT_HI_REFRESH_TOKEN: ${{ secrets.YT_HI_REFRESH_TOKEN }}
+          YT_GHIBLI_REFRESH_TOKEN: ${{ secrets.YT_GHIBLI_REFRESH_TOKEN }}
+        run: |
+          echo "### 🔍 Pre-flight Diagnostics" >> $GITHUB_STEP_SUMMARY
+          echo "| Check | Status | Note |" >> $GITHUB_STEP_SUMMARY
+          echo "| :--- | :--- | :--- |" >> $GITHUB_STEP_SUMMARY
+          echo "| **FFmpeg** | ✅ Installed | $(ffmpeg -version | head -n 1) |" >> $GITHUB_STEP_SUMMARY
+          
+          if [ -n "$GEMINI_API_KEY" ]; then
+            echo "| **Gemini AI API Key** | ✅ Configured | Active primary/backup routing |" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "| **Gemini AI API Key** | ℹ️ Keyless Mode | Will utilize Tier 1 keyless Pollinations endpoint |" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          MISSING_CREDS=false
+          if [ "${{ inputs.channel }}" = "english" ] && [ -z "$YT_EN_REFRESH_TOKEN" ]; then
+            MISSING_CREDS=true
+          elif [ "${{ inputs.channel }}" = "hindi" ] && [ -z "$YT_HI_REFRESH_TOKEN" ]; then
+            MISSING_CREDS=true
+          elif [ "${{ inputs.channel }}" = "ghibli" ] && [ -z "$YT_GHIBLI_REFRESH_TOKEN" ]; then
+            MISSING_CREDS=true
+          fi
+
+          if [ "$MISSING_CREDS" = "true" ] && [ "${{ inputs.action_mode }}" = "publish" ]; then
+            echo "::warning::YouTube OAuth refresh token not detected for channel '${{ inputs.channel }}'. Falling back to 'preview' mode."
+            echo "| **YouTube OAuth Token** | ⚠️ Not Configured | Auto-switching to Preview mode (MP4 will be downloadable below) |" >> $GITHUB_STEP_SUMMARY
+            echo "effective_mode=preview" >> $GITHUB_OUTPUT
+          else
+            echo "| **YouTube OAuth Token** | ✅ Ready / Ignored | Mode: ${{ inputs.action_mode }} |" >> $GITHUB_STEP_SUMMARY
+            echo "effective_mode=${{ inputs.action_mode }}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: 🚀 Execute Production Pipeline
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          YOUTUBE_CLIENT_ID: ${{ secrets.YT_CLIENT_ID }}
+          YOUTUBE_CLIENT_SECRET: ${{ secrets.YT_CLIENT_SECRET }}
+          YT_EN_REFRESH_TOKEN: ${{ secrets.YT_EN_REFRESH_TOKEN }}
+          YT_HI_REFRESH_TOKEN: ${{ secrets.YT_HI_REFRESH_TOKEN }}
+          YT_GHIBLI_REFRESH_TOKEN: ${{ secrets.YT_GHIBLI_REFRESH_TOKEN }}
+          YOUTUBE_PRIVACY_STATUS: ${{ inputs.privacy }}
+        run: |
+          CHANNEL="${{ inputs.channel }}"
+          FORMAT="${{ inputs.format }}"
+          PRIVACY="${{ inputs.privacy }}"
+          MODE="${{ steps.preflight.outputs.effective_mode }}"
+          THEME="${{ inputs.theme }}"
+          MULTIPART="${{ inputs.multipart }}"
+
+          DRY_RUN_FLAG=""
+          if [ "$MODE" = "preview" ]; then
+            DRY_RUN_FLAG="--dry-run"
+          fi
+
+          MULTIPART_FLAG=""
+          if [ "$MULTIPART" = "true" ]; then
+            MULTIPART_FLAG="--multipart"
+          fi
+
+          THEME_FLAG=""
+          if [ -n "$THEME" ]; then
+            THEME_FLAG="--theme \"$THEME\""
+          fi
+
+          echo "Running pipeline: Channel=$CHANNEL, Format=$FORMAT, Mode=$MODE, Privacy=$PRIVACY"
+
+          if [ "$CHANNEL" = "ghibli" ]; then
+            UPLOAD_FLAG=""
+            if [ "$MODE" = "publish" ]; then
+              UPLOAD_FLAG="--upload"
+            fi
+            python -m src.ghibli_pipeline --type "$FORMAT" --privacy "$PRIVACY" $DRY_RUN_FLAG $UPLOAD_FLAG $THEME_FLAG
+          elif [ "$CHANNEL" = "comparison" ]; then
+            python -m src.comparison.pipeline --format "$FORMAT" --privacy "$PRIVACY" $DRY_RUN_FLAG $THEME_FLAG 2>/dev/null || \
+            python -m src.pipeline --channel english --format "$FORMAT" --privacy "$PRIVACY" $DRY_RUN_FLAG
+          else
+            python -m src.pipeline --channel "$CHANNEL" --format "$FORMAT" --privacy "$PRIVACY" $DRY_RUN_FLAG $MULTIPART_FLAG
+          fi
+
+      - name: 📦 Upload Video & Thumbnail Artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: autopost-${{ inputs.channel }}-${{ inputs.format }}-artifacts
+          path: |
+            output/video/*.mp4
+            output/thumbnails/*.jpg
+            output/ghibli/*_final.mp4
+            output/ghibli/*_thumbnail.jpg
+          retention-days: 14
+
+      - name: 📊 Generate Rich GitHub Step Summary
+        if: always()
+        run: |
+          python -c '
+          import json, os
+          from pathlib import Path
+          
+          summary = []
+          summary.append("\n## 🎬 AutoPost Production Dashboard\n")
+          
+          # Read upload log if exists
+          upload_log = Path("data/upload_log.json")
+          last_video = None
+          if upload_log.exists():
+            try:
+              data = json.loads(upload_log.read_text(encoding="utf-8"))
+              if data:
+                last_video = data[-1]
+            except Exception:
+              pass
+          
+          summary.append("| Field | Details |")
+          summary.append("| :--- | :--- |")
+          summary.append(f"| **Channel** | `{os.environ.get(\"INPUT_CHANNEL\", \"english\").upper()}` |")
+          summary.append(f"| **Format** | `{os.environ.get(\"INPUT_FORMAT\", \"shorts\")}` |")
+          summary.append(f"| **Requested Privacy** | `{os.environ.get(\"INPUT_PRIVACY\", \"public\")}` |")
+          
+          if last_video:
+            vid_title = last_video.get("title", "Untitled")
+            vid_url = last_video.get("url", "")
+            is_dry = last_video.get("dry_run", False)
+            vid_status = last_video.get("privacy_status", "public")
+            
+            summary.append(f"| **Video Title** | **{vid_title}** |")
+            summary.append(f"| **Actual Privacy** | `{vid_status}` |")
+            
+            if is_dry:
+              summary.append("| **YouTube Upload** | 🧪 **Preview Mode (Simulated)** |")
+              summary.append("| **Download Media** | 📥 See attached artifact zip below |")
+            else:
+              summary.append(f"| **YouTube Link** | 🚀 [**Watch on YouTube**]({vid_url}) |")
+          else:
+            summary.append("| **Production Status** | 🏁 Render Completed |")
+          
+          summary.append("\n### 📥 Artifact Download Notice")
+          summary.append("Your finished `.mp4` video and `.jpg` thumbnail are preserved for 14 days.")
+          summary.append("Scroll down to the **Artifacts** section at the bottom of this page to download your high-resolution render.\n")
+          
+          summary_text = "\n".join(summary)
+          step_summary_file = os.environ.get("GITHUB_STEP_SUMMARY")
+          if step_summary_file:
+            with open(step_summary_file, "a", encoding="utf-8") as f:
+              f.write(summary_text)
+          '
+        env:
+          INPUT_CHANNEL: ${{ inputs.channel }}
+          INPUT_FORMAT: ${{ inputs.format }}
+          INPUT_PRIVACY: ${{ inputs.privacy }}
+
+      - name: 🧠 Persist Learning Memory & Strategy Cache
+        if: always()
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
+          git add data/ 2>/dev/null || true
+          git diff --staged --quiet || (git commit -m 'chore: evolve channel strategy and update cache [skip ci]' && git push)

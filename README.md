@@ -1,255 +1,231 @@
-# 🎬 AutoPost
+# 🎬 AutoPost: Autonomous AI YouTube Studio
 
-> **Fully Autonomous AI YouTube Automation & Channel Growth Pipeline**  
-> Hands-free viral video generation, voice synthesis, subtitle rendering, gameplay background splicing, and automated YouTube publishing powered by **Google Gemini** and **GitHub Actions**.
+> **Turnkey AI Video Studio & Autonomous Channel Growth Engine**  
+> Creates, narrates, animates, subtitles, and publishes viral YouTube Shorts & Long-Form videos automatically using **Google Gemini**, **Microsoft Neural TTS**, **Flux/SDXL**, and **GitHub Actions**.
 
-[![Python](https://img.shields.io/badge/Python-3.10%2B-blue?logo=python&logoColor=white)](https://www.python.org/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![GitHub Actions](https://img.shields.io/badge/GitHub_Actions-Automated_CI%2FCD-2088FF?logo=github-actions&logoColor=white)](.github/workflows/)
+[![One-Click Video Creator](https://github.com/sagardawadi16-web/autopost/actions/workflows/generate-video.yml/badge.svg)](https://github.com/sagardawadi16-web/autopost/actions/workflows/generate-video.yml)
+[![Daily English Shorts](https://github.com/sagardawadi16-web/autopost/actions/workflows/daily-english.yml/badge.svg)](https://github.com/sagardawadi16-web/autopost/actions/workflows/daily-english.yml)
+[![Daily Hindi Shorts](https://github.com/sagardawadi16-web/autopost/actions/workflows/daily-hindi.yml/badge.svg)](https://github.com/sagardawadi16-web/autopost/actions/workflows/daily-hindi.yml)
+[![Daily Ghibli Studio](https://github.com/sagardawadi16-web/autopost/actions/workflows/daily-ghibli.yml/badge.svg)](https://github.com/sagardawadi16-web/autopost/actions/workflows/daily-ghibli.yml)
+[![Python 3.12](https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white)](https://www.python.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Google Gemini](https://img.shields.io/badge/AI-Google_Gemini-4285F4?logo=google&logoColor=white)](https://aistudio.google.com/)
-[![Edge TTS](https://img.shields.io/badge/TTS-Microsoft_Edge-0078D7?logo=microsoft&logoColor=white)](https://github.com/rany2/edge-tts)
-[![FFmpeg](https://img.shields.io/badge/FFmpeg-Video_Engine-007808?logo=ffmpeg&logoColor=white)](https://ffmpeg.org/)
 
 ---
 
-## ⚡ Highlights
+## 🌟 Choose How You Want to Run AutoPost
 
-- **🧠 Autonomous Story Sourcing & AI Fallback**: Scrapes top stories from Reddit (`r/AmItheAsshole`, `r/ProRevenge`, `r/nosleep`, `r/entitledparents`) and features a **100% resilient Gemini AI story generator** that creates viral scripts with zero external API dependencies.
-- **🎙️ Neural Multi-Language Narration**: Natural, human-like voice synthesis in **English** and **Hindi** powered by Microsoft Edge Neural TTS with precise sentence pacing.
-- **🎮 Autonomous Background Gameplay Downloader**: Automatically downloads and manages copyright-free 1080x1920 vertical background videos (e.g. Minecraft Parkour), slicing random segments for every video.
-- **💬 Animated Karaoke Subtitles**: Renders word-by-word highlighted subtitles in `.ass` format with dynamic scaling, custom fonts, and high-retention color contrast.
-- **🎵 Procedural Audio Mixing & Ducking**: Automatically ducks ambient music tracks behind voice narration with soft fades and procedural audio generation.
-- **🖼️ High-CTR Thumbnail Generation**: Creates click-worthy thumbnails with niche-specific palettes, high-contrast badges, and dynamic text overlays.
-- **🧬 Strategic Evolution & Learning Memory**: Tracks winning hooks, pacing, click-through rates, and retention in `data/learning_memory.json`, dynamically refining future generation parameters.
-- **🚀 YouTube Data API v3 Automation**: Complete headless OAuth 2.0 authentication, metadata tagging, privacy selection (`public`, `unlisted`, `private`), and scheduled publishing.
-- **☁️ 100% Turnkey GitHub Actions**: Pre-configured daily cron workflows to build and publish English and Hindi Shorts daily without hosting your own server.
+| Method | Setup Time | What You Need | Best For |
+| :--- | :--- | :--- | :--- |
+| **☁️ GitHub Actions (Recommended)** | **2 minutes** | Just a browser! (No Python or FFmpeg install) | Running 24/7 in the cloud, daily automated posting, or 1-click video creation. |
+| **💻 Local Terminal (CLI)** | **5 minutes** | Python 3.12 & FFmpeg installed locally | Local development, rapid iteration, testing new video styles. |
 
 ---
 
-## 🏗️ Architecture & Workflow
+## 🚀 1-Click Run on GitHub (Zero Local Installation)
+
+You can generate and download or publish videos directly from the GitHub web UI in 60 seconds:
+
+```mermaid
+flowchart LR
+    A[1. Open Actions Tab] --> B[2. Click 'Produce & Publish Video']
+    B --> C[3. Select Channel & Options]
+    C --> D[4. Click 'Run workflow']
+    D --> E[5. Download MP4 or Watch on YouTube!]
+```
+
+1. Navigate to the **[Actions Tab](https://github.com/sagardawadi16-web/autopost/actions)** of this repository.
+2. In the left sidebar, click **[🎬 Produce & Publish Video (One-Click)](https://github.com/sagardawadi16-web/autopost/actions/workflows/generate-video.yml)**.
+3. Click the **Run workflow** dropdown on the right side.
+4. Customize your video:
+   - **Target Channel**: Select `english`, `hindi`, `ghibli`, or `comparison`.
+   - **Format**: Select `shorts` (9:16 vertical) or `longform` (16:9 landscape).
+   - **Action Mode**:
+     - `publish`: Renders video and uploads directly to your YouTube channel.
+     - `preview`: Renders video **without uploading**; allows you to download the `.mp4` and `.jpg` artifacts directly from GitHub!
+   - **YouTube Visibility**: `public` *(default)*, `unlisted`, or `private`.
+   - **Custom Topic / Theme**: *(Optional)* Enter any prompt (e.g., *"Monsoon rain evening in 90s village"* or *"Sister tried to extort wedding venue"*).
+5. Click **Run workflow** (green button).
+6. Once finished (2–3 minutes), click into the run to view the **Rich Summary Card** with your YouTube link and download your finished video under **Artifacts**!
+
+---
+
+## 🎨 Supported Video Styles & Channels
+
+AutoPost powers multiple distinct content channels out-of-the-box:
+
+| Channel Style | Visual Aesthetic | Audio & Narration | Target Format |
+| :--- | :--- | :--- | :--- |
+| **📺 English Reddit Stories** | Spliced 1080x1920 Minecraft Parkour gameplay footage | Multi-speaker neural English voiceover (`GuyNeural`, `JennyNeural`) + Word-by-word karaoke ASS subtitles | Shorts (9:16) & Longform (16:9) |
+| **🇮🇳 Hindi Kahaniya & Drama** | Dynamic Ken Burns thematic visual slideshow + atmospheric lighting | Rich Hindi neural narration (`MadhurNeural`, `SwaraNeural`) + procedural ambient soundtrack | Shorts (9:16) & Multi-Part Series |
+| **🍃 @GHIBLISTYLESTUDIO** | 90s Indian village nostalgia, watercolor gouache anime scenes (Flux/SDXL) + slow 2.5D camera pans | Layered ASMR soundscape (tin roof rain, chulha crackling, chai bubbling) + soft calming Swara narration | Shorts (9:16) & Landscape Stories |
+| **⚡ Comparison Shorts** | Split-screen comparative edits (*"Normal Save VS Genuine Love"*) | Energetic hooks + synchronized transition sfx | Shorts (9:16) |
+
+---
+
+## 🔑 2-Minute GitHub Secrets Setup
+
+To enable automated publishing and cloud execution, add the following secrets in **Settings** -> **Secrets and variables** -> **Actions** -> **New repository secret**:
+
+| Secret Name | Required? | Description | Where to Get It |
+| :--- | :---: | :--- | :--- |
+| `GEMINI_API_KEY` | **Recommended** | Powers autonomous viral scriptwriting & SEO | Free at [Google AI Studio](https://aistudio.google.com/app/apikey) *(Falls back to keyless Pollinations if absent)* |
+| `YT_CLIENT_ID` | **For Uploads** | Google Cloud OAuth Client ID | [Google Cloud Console](https://console.cloud.google.com/) (Desktop app credential) |
+| `YT_CLIENT_SECRET` | **For Uploads** | Google Cloud OAuth Client Secret | [Google Cloud Console](https://console.cloud.google.com/) |
+| `YT_EN_REFRESH_TOKEN` | Optional | Refresh token for English YouTube channel | Generated via `python -m src.pipeline --authorize --channel english` |
+| `YT_HI_REFRESH_TOKEN` | Optional | Refresh token for Hindi YouTube channel | Generated via `python -m src.pipeline --authorize --channel hindi` |
+| `YT_GHIBLI_REFRESH_TOKEN`| Optional | Refresh token for Ghibli YouTube channel | Generated via `python -m src.uploader.authorize_channel --channel ghibli` |
+
+> [!TIP]
+> **No YouTube credentials yet?** No problem! AutoPost automatically detects missing credentials and gracefully runs in **Preview Mode**, generating complete high-definition `.mp4` video files that you can preview and download directly from the GitHub Actions run page.
+
+---
+
+## 🏗️ Autonomous Architecture
 
 ```mermaid
 flowchart TD
-    A[Trigger: Daily Cron / Manual CLI] --> B[Scraper / AI Story Generator]
-    B -->|Story & Metadata| C[Scriptwriter & Hook Optimizer]
-    C -->|Optimized Script & SEO| D[Edge Neural TTS]
-    D -->|Speech MP3 + Word Timings| E[Karaoke Subtitle Styler]
-    D -->|Narration Track| F[Procedural Music Mixer]
-    G[Gameplay Manager / Downloader] -->|Random 1080x1920 Slice| H[Video Assembler]
-    E -->|Styled .ass File| H
-    F -->|Mixed Audio Track| H
-    H -->|Rendered MP4| I[Thumbnail Generator]
-    I -->|Thumbnail + Video| J[YouTube Uploader API v3]
-    J -->|Publish / Schedule| K[YouTube Channel]
-    K -->|Feedback Loop| L[Learning Memory Engine]
-    L -->|Optimized Weights| C
+    subgraph Sourcing ["1. Sourcing & Narrative Engine"]
+        A[Trigger: Cron Schedule or Web Dispatch] --> B{Source Strategy}
+        B -->|Live Reddit Scrape| C[Reddit Client]
+        B -->|Autonomous Generation| D[Multi-Tier LLM Gateway<br/>Pollinations ➔ Groq ➔ Gemini ➔ Kishōtenketsu]
+        C --> E[Content Evaluator & Viral Hook Gatekeeper]
+        D --> E
+    end
+
+    subgraph Production ["2. Neural Audio & Visuals"]
+        E --> F[Dialogue Splitter & SEO Optimizer]
+        F --> G[Microsoft Edge Neural TTS]
+        G --> H[Procedural Music Mixer & ASMR Soundscape]
+        E --> I{Visual Engine}
+        I -->|Reddit/Gaming| J[1080x1920 Parkour Gameplay Splicer]
+        I -->|Hindi Drama| K[Thematic Visual Ken Burns Slideshow]
+        I -->|Studio Ghibli| L[Flux 90s Watercolor Generator + 2.5D Motion]
+    end
+
+    subgraph Assembly ["3. Compositing & Publishing"]
+        H --> M[FFmpeg Compositor]
+        J --> M
+        K --> M
+        L --> M
+        F -->|Word Timings| N[Karaoke ASS Subtitle Burn-In]
+        N --> M
+        M --> O[High-CTR Dynamic Thumbnail Generator]
+        M --> P[YouTube Data API v3 Uploader]
+        O --> P
+        P --> Q[Public YouTube Publication]
+        P --> R[Learning Memory & Retention Evolution Feedback]
+    end
 ```
 
 ---
 
-## 📁 Repository Structure
+## 💻 Local CLI Quickstart
 
-```text
-autopost/
-├── .github/
-│   ├── ISSUE_TEMPLATE/           # Bug report & feature request templates
-│   └── workflows/
-│       ├── daily-english.yml     # Automated daily English Shorts schedule
-│       ├── daily-hindi.yml       # Automated daily Hindi Shorts schedule
-│       └── test-pipeline.yml     # Modular workflow for testing stages
-├── assets/                       # Asset directories (ignored by git, populated automatically)
-│   ├── audio/                    # Ambient background music tracks
-│   ├── fonts/                    # Custom TTF/OTF subtitle fonts
-│   ├── gameplay/                 # 1080x1920 vertical background footage
-│   └── images/                   # Static overlays and icons
-├── data/
-│   ├── learning_memory.json      # Evolutionary memory tracking winning hooks & pacing
-│   ├── used_stories.json         # Cache of processed stories to prevent duplicate uploads
-│   └── upload_log.json           # Log of published videos and URLs
-├── output/                       # Generated artifacts (MP4 videos, audio, thumbnails)
-├── src/
-│   ├── audio/                    # TTS engine, audio merging, and music mixing
-│   ├── evolution/                # Learning memory and strategy optimization
-│   ├── scraper/                  # Reddit client, AI story generator, and story selection
-│   ├── scriptwriter/             # Script rewriter, dialogue splitter, SEO, and translation
-│   ├── thumbnail/                # Thumbnail generator with dynamic text & badges
-│   ├── uploader/                 # YouTube OAuth client, token authorizer, and uploader
-│   ├── video/                    # Video assembler, subtitle styler, and gameplay manager
-│   ├── config.py                 # Central configuration and environment loader
-│   ├── pipeline.py               # Master orchestration CLI
-│   └── utils.py                  # Common utilities and FFmpeg helpers
-├── .env.example                  # Template for required environment variables
-├── .gitignore                    # Rigorous rules preventing credential or media leaks
-├── requirements.txt              # Python project dependencies
-├── CONTRIBUTING.md               # Guidelines for contributing
-├── SECURITY.md                   # Security and credential protection policy
-└── README.md
-```
-
----
-
-## 🚀 Quickstart
+If you prefer running or developing on your local machine:
 
 ### 1. Prerequisites
-- **Python 3.10+**
-- **FFmpeg**: Must be installed and accessible in your system `PATH` (with `libass` support).
-  - **Windows**: `winget install Gyan.FFmpeg` or `choco install ffmpeg`
-  - **Ubuntu/Debian**: `sudo apt update && sudo apt install -y ffmpeg`
+- **Python 3.10+** (Python 3.12 recommended)
+- **FFmpeg** in your system `PATH`:
+  - **Windows**: `winget install Gyan.FFmpeg`
   - **macOS**: `brew install ffmpeg`
+  - **Ubuntu/Debian**: `sudo apt update && sudo apt install -y ffmpeg`
 
-### 2. Installation
-
+### 2. Setup
 ```bash
-# Clone the repository
+# Clone repository
 git clone https://github.com/sagardawadi16-web/autopost.git
 cd autopost
 
-# Create and activate a virtual environment
+# Create and activate virtual environment
 python -m venv .venv
 source .venv/bin/activate       # Linux/macOS
 # or: .venv\Scripts\activate    # Windows PowerShell
 
 # Install dependencies
 pip install -r requirements.txt
-```
 
-### 3. Environment Configuration
-
-Copy the example environment configuration:
-
-```bash
-cp .env.example .env            # Linux/macOS
+# Configure environment keys
 copy .env.example .env          # Windows
+# or: cp .env.example .env      # Linux/macOS
 ```
 
-Edit `.env` and fill in your keys:
-
-```env
-# Required for AI generation, script rewriting, and SEO
-GEMINI_API_KEY=your_gemini_api_key_here
-
-# Required for YouTube uploads (Google Cloud Console OAuth 2.0 Desktop Client)
-YOUTUBE_CLIENT_ID=your_client_id_here
-YOUTUBE_CLIENT_SECRET=your_client_secret_here
-
-# Channel refresh tokens (generated via the built-in CLI below)
-YT_EN_REFRESH_TOKEN=your_english_refresh_token_here
-YT_HI_REFRESH_TOKEN=your_hindi_refresh_token_here
-```
-
-> [!IMPORTANT]
-> Never commit your `.env` file to version control. It is ignored by `.gitignore` by default.
-
----
-
-## 🔑 One-Time YouTube OAuth Setup
-
-AutoPost includes a built-in interactive authorizer to obtain long-lived refresh tokens:
-
-1. In the [Google Cloud Console](https://console.cloud.google.com/):
-   - Create a project.
-   - Enable the **YouTube Data API v3**.
-   - Configure the **OAuth Consent Screen** (set publishing status to *In-production* or add your email as a test user).
-   - Go to **Credentials** -> **Create Credentials** -> **OAuth Client ID** -> Application Type: **Desktop app**.
-   - Copy the Client ID and Client Secret into your `.env` file.
-2. Run the interactive authorizer:
-   ```bash
-   python -m src.pipeline --authorize --channel english
-   ```
-3. A browser window will open (or copy the displayed link). Sign in with your YouTube channel account and grant permission.
-4. The terminal will output your refresh token. Copy it into `.env` (or into your GitHub Repository Secrets).
-5. Repeat for `--channel hindi` if managing a bilingual channel.
-
----
-
-## 💻 CLI Usage
-
-### Run Full Autonomous Production
+### 3. One-Time YouTube Channel Authorization
 ```bash
-# Generate and upload an English Short (published publicly by default)
+python -m src.pipeline --authorize --channel english
+```
+*A browser window will open. Sign in to your channel account, grant permissions, and the CLI will automatically save your long-lived refresh token to `.env`.*
+
+### 4. Running Video Production
+```bash
+# Generate and publish an English Short (Public by default)
 python -m src.pipeline --channel english --format shorts
 
-# Generate and upload a Hindi Short (published publicly by default)
+# Generate and publish a Hindi Short (Public by default)
 python -m src.pipeline --channel hindi --format shorts
 
-# Optional: Upload with custom visibility ('public', 'unlisted', or 'private')
+# Produce a Studio Ghibli nostalgic short
+python -m src.ghibli_pipeline --type shorts --upload
+
+# Produce with custom visibility (public, unlisted, private)
 python -m src.pipeline --channel english --privacy public
 python -m src.pipeline --channel english --privacy unlisted
-```
 
-### Dry-Run Simulation (No YouTube Upload)
-Test the entire pipeline locally without publishing:
-```bash
+# Preview mode (local render only, no upload)
 python -m src.pipeline --channel english --dry-run
 ```
-*Generated videos and thumbnails will be saved in `output/video/` and `output/thumbnails/`.*
 
-### Test Individual Pipeline Stages
+### 5. Testing Individual Pipeline Stages
+Diagnose or test individual components in seconds:
 ```bash
-# Test story fetching & AI generation
-python -m src.pipeline --channel english --stage scrape
-
-# Test scriptwriting & SEO optimization
-python -m src.pipeline --channel english --stage script
-
-# Test voice synthesis & ambient audio mixing
-python -m src.pipeline --channel english --stage audio
-
-# Test video rendering & subtitle styling
-python -m src.pipeline --channel english --stage video
-
-# Test thumbnail generation
-python -m src.pipeline --channel english --stage thumbnail
-```
-
-### Strategic Learning Report
-Inspect channel growth patterns, retention observations, and winning hook rules:
-```bash
-python -m src.pipeline --report
+python -m src.pipeline --channel english --stage scrape     # Test story generation & scraping
+python -m src.pipeline --channel english --stage script     # Test scriptwriting & viral SEO
+python -m src.pipeline --channel english --stage audio      # Test multi-voice neural TTS
+python -m src.pipeline --channel english --stage video      # Test background gameplay rendering
+python -m src.pipeline --channel english --stage thumbnail  # Test thumbnail generator
 ```
 
 ---
 
-## ☁️ 24/7 Cloud Automation (GitHub Actions)
+## ❓ Frequently Asked Questions
 
-AutoPost comes with pre-configured GitHub Actions workflows for continuous daily publishing with zero infrastructure costs.
+<details>
+<summary><b>Q: Why was my video previously uploaded as Unlisted?</b></summary>
+<br/>
+Earlier versions defaulted to <code>unlisted</code> for test safety. All pipelines and GitHub Actions workflows now default to <b><code>public</code></b>. You can configure this globally with <code>YOUTUBE_PRIVACY_STATUS=public</code> or pass <code>--privacy unlisted</code> whenever you want a manual review link first.
+</details>
 
-### Setting Up GitHub Secrets
-Go to your GitHub repository -> **Settings** -> **Secrets and variables** -> **Actions** -> **New repository secret**, and add:
+<details>
+<summary><b>Q: What happens if my Gemini API key runs out of quota?</b></summary>
+<br/>
+AutoPost includes a 5-tier multi-provider failover system. If Gemini returns a 429 quota error, the pipeline automatically routes through keyless Pollinations endpoints and deterministic Kishōtenketsu story blueprints. Your video generation never stops or crashes.
+</details>
 
-| Secret Name | Description |
-| ----------- | ----------- |
-| `GEMINI_API_KEY` | Google Gemini API key |
-| `YT_CLIENT_ID` | Google OAuth Client ID |
-| `YT_CLIENT_SECRET` | Google OAuth Client Secret |
-| `YT_EN_REFRESH_TOKEN` | Refresh token for English channel |
-| `YT_HI_REFRESH_TOKEN` | Refresh token for Hindi channel |
-| `REDDIT_CLIENT_ID` | *(Optional)* Reddit API Client ID |
-| `REDDIT_CLIENT_SECRET` | *(Optional)* Reddit API Client Secret |
+<details>
+<summary><b>Q: Where are the generated videos saved?</b></summary>
+<br/>
+- <b>On GitHub Actions</b>: Download the <code>.mp4</code> and <code>.jpg</code> directly from the <b>Artifacts</b> section at the bottom of the run page.
+- <b>Locally</b>: Videos are stored in <code>output/video/</code> and <code>output/ghibli/</code>; thumbnails are stored in <code>output/thumbnails/</code>.
+</details>
 
-### Workflows Included:
-- **Daily English Short** (`.github/workflows/daily-english.yml`): Runs daily at 11:30 UTC.
-- **Daily Hindi Short** (`.github/workflows/daily-hindi.yml`): Runs daily at 13:00 UTC.
-- **Test Pipeline** (`.github/workflows/test-pipeline.yml`): Manual dispatch with selectable channel and stage.
-
-All workflows upload generated video artifacts to GitHub Actions for 14 days and automatically commit updated learning memory back to the repository.
-
----
-
-## 🔒 Security & Privacy
-
-We treat security and credential safety as top priorities:
-- **No Hardcoded Credentials**: All secrets are retrieved via environment variables.
-- **Zero-Commit Policy**: `.gitignore` strictly excludes `.env`, `secrets.json`, `client_secret*.json`, `*.pem`, `*.key`, and temporary video/audio files.
-- **Safe Fallbacks**: When YouTube credentials are not present, the pipeline defaults to simulation mode (`--dry-run`) and retains rendered assets locally.
-
-For vulnerability reports and security best practices, see [SECURITY.md](SECURITY.md).
+<details>
+<summary><b>Q: How do the automated daily cron schedules work?</b></summary>
+<br/>
+AutoPost includes pre-configured GitHub Actions crons:
+- <b>Daily English Short</b>: Runs daily at 11:30 UTC (~5:15 PM Nepal time).
+- <b>Daily Hindi Short</b>: Runs daily at 13:00 UTC (~6:45 PM Nepal time).
+- <b>Daily Ghibli Studio</b>: Runs daily at 12:30 UTC (~6:15 PM Nepal time).
+All runs automatically commit updated channel evolution and retention memory back to the repository.
+</details>
 
 ---
 
-## 🤝 Contributing
+## 🤝 Community & Contributing
 
-Contributions, bug reports, and suggestions are welcome! Please check [CONTRIBUTING.md](CONTRIBUTING.md) for details on code style, testing, and pull requests.
+Contributions, feature ideas, and style requests are welcome!
+- Check [CONTRIBUTING.md](CONTRIBUTING.md) for architectural guidelines.
+- Report issues or suggest new channel aesthetics using our [Issue Templates](.github/ISSUE_TEMPLATE/).
+- Review credential safety guidelines in [SECURITY.md](SECURITY.md).
 
 ---
 

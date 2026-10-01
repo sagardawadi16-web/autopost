@@ -20,6 +20,7 @@ YOUTUBE_SCOPES = [
     "https://www.googleapis.com/auth/youtube.upload",
     "https://www.googleapis.com/auth/youtube",
     "https://www.googleapis.com/auth/youtube.readonly",
+    "https://www.googleapis.com/auth/drive.file",
 ]
 
 
@@ -67,7 +68,7 @@ class YouTubeAuth:
             token_uri="https://oauth2.googleapis.com/token",
             client_id=self.client_id,
             client_secret=self.client_secret,
-            scopes=YOUTUBE_SCOPES,
+            scopes=None,
         )
 
         # Refresh access token
