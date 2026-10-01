@@ -198,9 +198,12 @@ jobs:
           
           summary.append("| Field | Details |")
           summary.append("| :--- | :--- |")
-          summary.append(f"| **Channel** | `{os.environ.get(\"INPUT_CHANNEL\", \"english\").upper()}` |")
-          summary.append(f"| **Format** | `{os.environ.get(\"INPUT_FORMAT\", \"shorts\")}` |")
-          summary.append(f"| **Requested Privacy** | `{os.environ.get(\"INPUT_PRIVACY\", \"public\")}` |")
+          chan = os.environ.get("INPUT_CHANNEL", "english").upper()
+          fmt = os.environ.get("INPUT_FORMAT", "shorts")
+          priv = os.environ.get("INPUT_PRIVACY", "public")
+          summary.append(f"| **Channel** | `{chan}` |")
+          summary.append(f"| **Format** | `{fmt}` |")
+          summary.append(f"| **Requested Privacy** | `{priv}` |")
           
           if last_video:
             vid_title = last_video.get("title", "Untitled")

@@ -99,12 +99,15 @@ jobs:
               data = json.loads(log_file.read_text(encoding="utf-8"))
               if data:
                 last = data[-1]
-                summary.append(f"- **Title:** {last.get(\"title\", \"N/A\")}")
-                summary.append(f"- **Privacy:** `{last.get(\"privacy_status\", \"public\")}`")
+                title = last.get("title", "N/A")
+                privacy = last.get("privacy_status", "public")
+                url = last.get("url", "")
+                summary.append(f"- **Title:** {title}")
+                summary.append(f"- **Privacy:** `{privacy}`")
                 if last.get("dry_run"):
                   summary.append("- **Status:** 🧪 Simulation / Artifact preview")
                 else:
-                  summary.append(f"- **YouTube URL:** 🚀 [{last.get(\"url\")}]({last.get(\"url\")})")
+                  summary.append(f"- **YouTube URL:** 🚀 [{url}]({url})")
             except Exception:
               pass
           summary.append("\n*Download the rendered video from the **Artifacts** section below.*")

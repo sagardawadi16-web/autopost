@@ -70,15 +70,23 @@ from src.video.subtitle_styler import SubtitleStyler
 class AutomationPipeline:
     """Master controller executing the complete automated production pipeline."""
 
-    def __init__(self, channel: str = "english", dry_run: bool = False, privacy: Optional[str] = None) -> None:
+    def __init__(
+        self,
+        channel: str = "english",
+        dry_run: bool = False,
+        privacy: Optional[str] = None,
+        target_upload_channel: Optional[str] = None,
+    ) -> None:
         """Initialize pipeline for a target channel.
 
         Args:
             channel: 'english' or 'hindi'.
             dry_run: If True, operates in simulation/testing mode.
             privacy: YouTube privacy status ('public', 'unlisted', or 'private').
+            target_upload_channel: Optional YouTube destination channel (e.g. 'ghibli' powerhouse).
         """
         self.channel = channel.lower()
+        self.target_upload_channel = (target_upload_channel or channel).lower()
         self.dry_run = dry_run
         self.privacy = (privacy or YOUTUBE_SETTINGS.default_privacy_status or "public").lower()
         ensure_directories()
@@ -105,8 +113,13 @@ class AutomationPipeline:
         self.thumb_gen = ThumbnailGenerator(memory=self.memory)
 
         # YouTube uploader initialization
-        channel_cfg = get_channel_config(self.channel)
+        channel_to_use = self.target_upload_channel if self.target_upload_channel in CHANNEL_CONFIGS else self.channel
+        channel_cfg = get_channel_config(channel_to_use)
         refresh_token = channel_cfg.refresh_token
+        if not refresh_token:
+            from src.config import YT_GHIBLI_REFRESH_TOKEN, YT_EN_REFRESH_TOKEN
+            refresh_token = YT_GHIBLI_REFRESH_TOKEN or YT_EN_REFRESH_TOKEN
+
         auth = None
         if refresh_token and not dry_run:
             try:
@@ -339,7 +352,7 @@ class AutomationPipeline:
             metadata=metadata,
             thumbnail_path=thumbnail_path,
             privacy_status=self.privacy,
-            channel_name=self.channel,
+            channel_name=self.target_upload_channel,
             dry_run=effective_dry_run,
         )
 
@@ -348,7 +361,7 @@ class AutomationPipeline:
             story_id=story_id,
             title=story.get("title", ""),
             subreddit=story.get("subreddit", "unknown"),
-            channel=self.channel,
+            channel=self.target_upload_channel,
         )
 
         # -------------------------------------------------------------
@@ -542,6 +555,12 @@ def main() -> None:
         help="YouTube video visibility status (default: public)",
     )
     parser.add_argument(
+        "--target-channel",
+        choices=["english", "hindi", "ghibli"],
+        default=None,
+        help="Target YouTube destination channel for upload (e.g. ghibli powerhouse)",
+    )
+    parser.add_argument(
         "--stage",
         choices=["scrape", "script", "audio", "video", "thumbnail", "full"],
         default="full",
@@ -573,7 +592,12 @@ def main() -> None:
         authorize_channel(channel=args.channel)
         sys.exit(0)
 
-    pipeline = AutomationPipeline(channel=args.channel, dry_run=args.dry_run, privacy=args.privacy)
+    pipeline = AutomationPipeline(
+        channel=args.channel,
+        dry_run=args.dry_run,
+        privacy=args.privacy,
+        target_upload_channel=args.target_channel,
+    )
 
     if args.stage != "full":
         pipeline.run_stage(stage=args.stage, is_shorts=(args.format == "shorts"))
