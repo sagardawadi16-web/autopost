@@ -17,6 +17,63 @@ from src.evolution.learning_memory import StrategicLearningMemory
 
 logger = logging.getLogger(__name__)
 
+DESKTOP_CUT, MOBILE_CUT, HARD_CUT = 60, 40, 100
+VAGUE_WORDS = {"amazing", "incredible", "insane", "crazy", "huge", "massive", "ultimate", "best", "powerful", "secret", "revolutionary", "mindblowing", "epic", "perfect", "complete"}
+STOP_WORDS = {"the", "a", "an", "of", "for", "to", "in", "on", "and", "or", "is", "are", "with", "your", "you", "my", "i", "this", "that", "it", "how", "what", "why"}
+
+
+def lint_title_pairing(title: str, thumb: Optional[str] = None) -> Dict[str, Any]:
+    """Lint and score a title & thumbnail pairing based on YouTube CTR best practices."""
+    t = title.strip()
+    n = len(t)
+    issues, good = [], []
+    if n > HARD_CUT:
+        issues.append(("length", f"{n} chars exceeds hard limit ({HARD_CUT})"))
+    elif n > DESKTOP_CUT:
+        issues.append(("length", f"{n} chars cuts on desktop search ({DESKTOP_CUT})"))
+    else:
+        good.append(f"{n} chars, within desktop limit")
+
+    if n > MOBILE_CUT:
+        head = t[:MOBILE_CUT].rsplit(" ", 1)[0]
+        issues.append(("mobile", f'mobile feed cuts to "{head}..."'))
+
+    caps = [w for w in t.split() if len(w) > 2 and w.isupper()]
+    if len(caps) > 2:
+        issues.append(("shouting", f"{len(caps)} all-caps words"))
+    elif caps:
+        good.append(f"{len(caps)} capitalized emphasis word")
+
+    words_in_t = re.findall(r"[a-z0-9']+", t.lower())
+    vague_matches = [w for w in words_in_t if w in VAGUE_WORDS]
+    if vague_matches:
+        issues.append(("vague", f"vague adjectives: {', '.join(sorted(set(vague_matches)))}"))
+
+    nums = re.findall(r"\d[\d,.]*%?", t)
+    if nums:
+        good.append(f"carries concrete figure ({', '.join(nums[:3])})")
+    else:
+        issues.append(("no-number", "missing specific number, name, or date"))
+
+    if t.endswith("?"):
+        good.append("open question hook")
+
+    front = [w for w in words_in_t[:3] if w not in STOP_WORDS]
+    if not front:
+        issues.append(("front-load", "first three words are filler"))
+
+    if thumb:
+        tw = set(words_in_t) - STOP_WORDS
+        hw = set(re.findall(r"[a-z0-9']+", thumb.lower())) - STOP_WORDS
+        shared = tw & hw
+        if shared:
+            issues.append(("duplicate", f"thumbnail duplicates title words: {', '.join(sorted(shared))}"))
+        else:
+            good.append("thumbnail and title complement each other")
+
+    score = max(0, min(100, 100 - 14 * len(issues) + 4 * len(good)))
+    return {"score": score, "issues": issues, "good": good}
+
 
 @dataclass
 class VideoMetadata:
@@ -132,6 +189,11 @@ Return ONLY valid JSON:
         text = re.sub(r"^```(?:json)?", "", text)
         text = re.sub(r"```$", "", text).strip()
         import json
+        try:
+            data = json.loads(text)
+        except Exception:
+            data = {}
+
         title = data.get("title", raw_title)[:SEO_SETTINGS.max_title_length]
 
         if part_number is not None:
@@ -145,6 +207,10 @@ Return ONLY valid JSON:
         thumb_text = data.get("thumbnail_text", "UNBELIEVABLE")[:30]
         if part_number is not None:
             thumb_text = f"PART {part_number}"
+
+        # Audit and lint title-thumbnail pairing using yt-package principles
+        lint_result = lint_title_pairing(title, thumb_text)
+        logger.info(f"Generated SEO title score: {lint_result['score']}/100. Issues: {lint_result['issues']}")
 
         followup_note = ""
         if part_number == 1:

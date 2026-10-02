@@ -16,6 +16,64 @@ from typing import Any, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 
+FILLER = {"basically", "actually", "literally", "just", "really", "very", "so", "kind", "sort", "like", "guys", "hey", "welcome", "today", "video", "subscribe", "channel"}
+VAGUE = {"amazing", "incredible", "insane", "crazy", "huge", "massive", "game", "changer", "secret", "powerful", "ultimate", "best", "revolutionary", "mind", "blowing", "unbelievable"}
+CONCRETE = re.compile(r"\b(\d[\d,.]*\s?(%|k|m|x|s|m|h)?|\$\d|\d+\s?(second|minute|hour|day|week|month|year)s?)\b", re.I)
+YOU = re.compile(r"\b(you|your|you're|youre|yourself)\b", re.I)
+STAKE = re.compile(r"\b(lose|lost|wasting|waste|quit|fail|broke|cost|risk|before|stop|never|die|dying|dead)\b", re.I)
+CURIOSITY = re.compile(r"\b(why|how|what|which|until|before|but|nobody|almost|except|reason|actually)\b", re.I)
+
+FIX_SUGGESTIONS = {
+    "SPECIFICITY": "swap vague adjectives for concrete figures, names, or dates",
+    "ADDRESS": "say 'you' or 'your' in the first 6 words",
+    "STAKES": "name what it costs to ignore or misjudge this situation",
+    "CURIOSITY": "cut the portion of the sentence that answers itself",
+    "BREVITY": "keep hook length strictly between 9 and 24 words",
+}
+
+
+def score_hook(text: str) -> tuple[dict, int, str]:
+    """Score a hook on 5 properties (0-100 each) and compute a weighted verdict."""
+    w = re.findall(r"[a-z0-9'%$.]+", text.lower())
+    if not w:
+        return {"SPECIFICITY": 0, "ADDRESS": 0, "STAKES": 0, "CURIOSITY": 0, "BREVITY": 0}, 0, "BREVITY"
+
+    # Specificity
+    nums = len(CONCRETE.findall(text))
+    vague_cnt = sum(1 for x in w if x in VAGUE)
+    filler_cnt = sum(1 for x in w if x in FILLER)
+    spec = max(0, min(100, 34 + nums * 22 - vague_cnt * 16 - filler_cnt * 5))
+
+    # Address
+    you_cnt = len(YOU.findall(text))
+    first_you = 30 if YOU.search(" ".join(text.split()[:6])) else 0
+    addr = max(0, min(100, 26 + you_cnt * 20 + first_you))
+
+    # Stakes
+    stake_cnt = len(STAKE.findall(text))
+    stk = max(0, min(100, 22 + stake_cnt * 26 + (14 if CONCRETE.search(text) else 0)))
+
+    # Curiosity
+    cur_cnt = len(CURIOSITY.findall(text))
+    q = 18 if text.strip().endswith("?") else 0
+    closed = -18 if re.search(r"\b(because|so that|which means)\b", text, re.I) else 0
+    cur = max(0, min(100, 24 + cur_cnt * 17 + q + closed))
+
+    # Brevity
+    n_words = len(w)
+    if 9 <= n_words <= 24:
+        brev = 100
+    elif n_words < 9:
+        brev = max(30, 100 - (9 - n_words) * 11)
+    else:
+        brev = max(10, 100 - (n_words - 24) * 7)
+
+    parts = {"SPECIFICITY": spec, "ADDRESS": addr, "STAKES": stk, "CURIOSITY": cur, "BREVITY": brev}
+    vals = list(parts.values())
+    verdict = round(0.6 * (sum(vals) / len(vals)) + 0.4 * min(vals))
+    weakest = min(parts, key=parts.get)
+    return parts, verdict, weakest
+
 
 @dataclass
 class EvaluationReport:
@@ -103,25 +161,19 @@ class ContentEvaluator:
                 rejections.append(f"Safety violation: Contains dangerous keyword '{term}'.")
                 break
 
-        # 2. Hook Analysis
-        hook_score = 7.0
-        strong_hook_words = [
-            "never", "mistake", "regret", "warning", "secret", "horror",
-            "screaming", "caught", "trapped", "ruined", "threatened", "confession",
-            "worst", "shocked", "discovered"
-        ]
-        hook_matches = sum(1 for w in strong_hook_words if w in opening_50_words)
+        # 2. Hook Analysis via yt-script hookscore algorithm
+        first_sentence = paragraphs[0] if paragraphs else script_text[:150]
+        # Remove speaker tags for hook evaluation
+        clean_first_sentence = re.sub(r"\[.*?\]", "", first_sentence).strip()
+        hook_parts, hook_verdict_100, weakest_prop = score_hook(clean_first_sentence)
+        hook_score = round(hook_verdict_100 / 10.0, 1)
 
-        if hook_matches >= 3:
-            hook_score = 9.0
-            reasoning.append("Hook contains high-urgency curiosity triggers in the first 50 words.")
-        elif hook_matches >= 1:
-            hook_score = 7.8
-            reasoning.append("Hook has acceptable curiosity elements but could be sharper.")
+        reasoning.append(f"HookScore: {hook_verdict_100}/100 ({hook_parts}). Weakest property: {weakest_prop}.")
+        if hook_verdict_100 < 60:
+            fix_tip = FIX_SUGGESTIONS.get(weakest_prop, "strengthen opening tension")
+            revisions.append(f"Hook score is weak ({hook_verdict_100}/100). Fix {weakest_prop}: {fix_tip}.")
         else:
-            hook_score = 5.0
-            reasoning.append("Opening lacks immediate drama; risks viewer bounce in first 5 seconds.")
-            revisions.append("Rewrite the first sentence to present the core shock or dilemma immediately.")
+            reasoning.append(f"Hook is strong ({hook_verdict_100}/100) with clear retention pull.")
 
         # 3. Pacing & Length Check
         pacing_score = 8.0
