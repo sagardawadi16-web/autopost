@@ -107,8 +107,8 @@ class GameplayManager:
             get_ffmpeg_cmd(),
             "-y",
             "-ss", str(start_offset),
-            "-stream_loop", "2",
             "-i", str(clip_path),
+            "-stream_loop", "2",
             "-t", str(duration_sec + 1.0),
             "-vf", filter_chain,
             "-an",  # strip original audio
