@@ -1,8 +1,8 @@
 name: Daily Ghibli Studio Auto-Pilot
 
 on:
-  schedule:
-    - cron: '30 12 * * *'  # 6:15 PM Nepal Time daily
+  # schedule:
+  #   - cron: '30 12 * * *'  # 6:15 PM Nepal Time daily
   workflow_dispatch:
     inputs:
       format:

@@ -100,7 +100,9 @@ STORY TEXT:
 
 Generate the Shorts script now:
 """
-        return call_gemini_with_fallback(prompt=prompt, api_key=self.api_key)
+        raw_output = call_gemini_with_fallback(prompt=prompt, api_key=self.api_key)
+        from src.scriptwriter.rewriter import ScriptRewriter
+        return ScriptRewriter._clean_llm_script(raw_output)
 
     def _extract_heuristic(self, title: str, body: str, category: str) -> str:
         """Deterministic heuristic condenser targeting ~140 words."""

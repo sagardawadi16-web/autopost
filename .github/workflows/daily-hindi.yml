@@ -1,8 +1,8 @@
 name: Daily Hindi Video
 
 on:
-  schedule:
-    - cron: '0 13 * * *'  # ~6:45 PM Nepal time
+  # schedule:
+  #   - cron: '0 13 * * *'  # ~6:45 PM Nepal time
   workflow_dispatch:
     inputs:
       format:
