@@ -175,7 +175,7 @@ CRITICAL REQUIREMENTS:
                     "I spent 4 years building our company's entire backend architecture from scratch as an underpaid lead dev. "
                     "When I requested 3 days off for my wedding, my boss laughed and said 'if you don't show up Monday, don't come back at all'. "
                     "I handed him my badge on the spot. What he forgot was that my employment contract explicitly stated all proprietary scripts I wrote on personal hardware belonged to my private LLC. "
-                    "On Tuesday morning, their automated pipeline collapsed. When they threatened to sue, my lawyer sent over the contract terms along with a \$250/hr consulting fee offer. They had to pay me \$45,000 to fix it."
+                    "On Tuesday morning, their automated pipeline collapsed. When they threatened to sue, my lawyer sent over the contract terms along with a $250/hr consulting fee offer. They had to pay me $45,000 to fix it."
                 ),
             },
             {
@@ -217,7 +217,7 @@ CRITICAL REQUIREMENTS:
                 "subreddit": "AmItheAsshole",
                 "title": "AITA For Exposing My Brother-in-Law at Thanksgiving After He Stole My College Fund?",
                 "body": (
-                    "Three years ago, my late uncle left me \$30,000 earmarked for my master's degree. "
+                    "Three years ago, my late uncle left me $30,000 earmarked for my master's degree. "
                     "My parents convinced me to put my brother-in-law as a co-trustee because he was a 'financial manager'. "
                     "When I went to pay my tuition last month, the account was completely drained. He bought a luxury boat and claimed the market crashed. "
                     "At Thanksgiving dinner, in front of his entire extended family, I handed out printed bank statements showing his direct transfers to the boat dealership."
@@ -241,7 +241,7 @@ CRITICAL REQUIREMENTS:
                 "body": (
                     "During our divorce proceedings, my ex-wife hired a ruthless lawyer claiming she was entitled to 50% of my startup. "
                     "She lied under oath, claiming she funded the company's inception. "
-                    "What she forgot was that I had hired a forensic accountant three months prior who uncovered \$180,000 she had quietly embezzled from her family business into hidden offshore accounts. "
+                    "What she forgot was that I had hired a forensic accountant three months prior who uncovered $180,000 she had quietly embezzled from her family business into hidden offshore accounts. "
                     "When my lawyer submitted the bank records to the judge, her lawyer withdrew from the case on the spot, and the judge ordered her to pay all my legal fees."
                 ),
             },
