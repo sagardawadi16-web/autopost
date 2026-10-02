@@ -33,16 +33,16 @@ class VideoAssembler:
         self,
         background_video: Path,
         soundtrack_audio: Path,
-        subtitles_ass: Path,
+        subtitles_ass: Optional[Path],
         output_filename: str,
         duration_seconds: float,
     ) -> Path:
-        """Assemble full long-form video with burned-in subtitles.
+        """Assemble full long-form video with optional burned-in subtitles.
 
         Args:
             background_video: Prepared background gameplay video.
             soundtrack_audio: Mixed audio track (speech + background music).
-            subtitles_ass: Styled ASS subtitle file.
+            subtitles_ass: Styled ASS subtitle file (Optional; None disables subtitles).
             output_filename: Name of the resulting MP4 (without extension).
             duration_seconds: Total duration of narration audio.
 
@@ -51,16 +51,19 @@ class VideoAssembler:
         """
         output_mp4 = self.output_dir / f"{output_filename}.mp4"
 
-        # Escape subtitle path for FFmpeg filter syntax
-        clean_sub_path = str(subtitles_ass.resolve()).replace("\\", "/").replace(":", "\\:")
-
         # Build FFmpeg command
         cmd = [
             get_ffmpeg_cmd(),
             "-y",
             "-i", str(background_video),
             "-i", str(soundtrack_audio),
-            "-vf", f"ass='{clean_sub_path}'",
+        ]
+
+        if subtitles_ass is not None:
+            clean_sub_path = str(subtitles_ass.resolve()).replace("\\", "/").replace(":", "\\:")
+            cmd.extend(["-vf", f"ass='{clean_sub_path}'"])
+
+        cmd.extend([
             "-map", "0:v:0",
             "-map", "1:a:0",
             "-c:v", VIDEO_SETTINGS.video_codec,
@@ -71,7 +74,7 @@ class VideoAssembler:
             "-b:a", VIDEO_SETTINGS.audio_bitrate,
             "-t", str(duration_seconds),
             str(output_mp4),
-        ]
+        ])
 
         logger.info(f"Rendering long-form video '{output_mp4.name}' ({duration_seconds:.1f}s)...")
         try:

@@ -100,7 +100,7 @@ class DailyPowerhouseRunner:
             pipeline = GhibliPipeline(dry_run=self.dry_run, privacy=self.privacy)
             result = pipeline.run(
                 is_shorts=True,
-                burn_subtitles=True,
+                burn_subtitles=False,
                 upload=self.upload,
                 upload_drive=True,
             )
@@ -133,9 +133,9 @@ class DailyPowerhouseRunner:
                 channel="hindi",
                 dry_run=self.dry_run,
                 privacy=self.privacy,
-                target_upload_channel=self.target_channel,
+                target_upload_channel="hindi",
             )
-            result = pipeline.run(is_shorts=True, multipart=False)
+            result = pipeline.run(is_shorts=True, multipart=False, burn_subtitles=False)
             elapsed = round(time.time() - start_time, 2)
             upload_info = result.get("upload_info", {})
             v_id = upload_info.get("video_id")
@@ -168,9 +168,9 @@ class DailyPowerhouseRunner:
                 channel="english",
                 dry_run=self.dry_run,
                 privacy=self.privacy,
-                target_upload_channel=self.target_channel,
+                target_upload_channel="english",
             )
-            result = pipeline.run(is_shorts=True, multipart=True)
+            result = pipeline.run(is_shorts=True, multipart=True, burn_subtitles=False)
             elapsed = round(time.time() - start_time, 2)
             upload_info = result.get("upload_info", {})
             v_id = upload_info.get("video_id")
