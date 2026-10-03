@@ -1,11 +1,11 @@
 {
   "version": "1.0.0",
-  "last_updated": "2026-10-02T16:13:46.866309+00:00",
+  "last_updated": "2026-10-03T16:28:34.994593+00:00",
   "niche_weights": {
     "nosleep": 1.25,
     "creepy": 1.15,
     "ProRevenge": 3.0,
-    "AmItheAsshole": 2.55,
+    "AmItheAsshole": 2.95,
     "entitledparents": 1.2,
     "relationship_advice": 1.1,
     "tifu": 1.05
@@ -837,6 +837,339 @@
       "reasoning": "Superior audience retention (65.0%). Hook 'Direct stakes confrontation' captivated audience effectively.",
       "rule_added": "Prioritize 'Direct stakes confrontation' hook style for revenge content.",
       "confidence_score": 0.85
+    },
+    {
+      "id": "exp_088_202610031625",
+      "timestamp": "2026-10-03T16:25:30.392261+00:00",
+      "hypothesis": "Testing drama story from r/AmItheAsshole with Direct stakes confrontation hook.",
+      "observation": "Achieved 1250 views, 7.4% CTR, and 64.2% retention.",
+      "reasoning": "",
+      "rule_added": "Maintain baseline pacing for drama.",
+      "confidence_score": 0.85
+    },
+    {
+      "id": "exp_089_202610031625",
+      "timestamp": "2026-10-03T16:25:30.395423+00:00",
+      "hypothesis": "Testing drama story from r/AmItheAsshole with Direct stakes confrontation hook.",
+      "observation": "Achieved 1000 views, 7.5% CTR, and 65.0% retention.",
+      "reasoning": "Superior audience retention (65.0%). Hook 'Direct stakes confrontation' captivated audience effectively.",
+      "rule_added": "Prioritize 'Direct stakes confrontation' hook style for drama content.",
+      "confidence_score": 0.85
+    },
+    {
+      "id": "exp_090_202610031625",
+      "timestamp": "2026-10-03T16:25:30.398466+00:00",
+      "hypothesis": "Testing drama story from r/AmItheAsshole with Direct stakes confrontation hook.",
+      "observation": "Achieved 1000 views, 7.5% CTR, and 65.0% retention.",
+      "reasoning": "Superior audience retention (65.0%). Hook 'Direct stakes confrontation' captivated audience effectively.",
+      "rule_added": "Prioritize 'Direct stakes confrontation' hook style for drama content.",
+      "confidence_score": 0.85
+    },
+    {
+      "id": "exp_091_202610031625",
+      "timestamp": "2026-10-03T16:25:30.401534+00:00",
+      "hypothesis": "Testing revenge story from r/ProRevenge with Direct stakes confrontation hook.",
+      "observation": "Achieved 1000 views, 7.5% CTR, and 65.0% retention.",
+      "reasoning": "Superior audience retention (65.0%). Hook 'Direct stakes confrontation' captivated audience effectively.",
+      "rule_added": "Prioritize 'Direct stakes confrontation' hook style for revenge content.",
+      "confidence_score": 0.85
+    },
+    {
+      "id": "exp_092_202610031625",
+      "timestamp": "2026-10-03T16:25:30.404719+00:00",
+      "hypothesis": "Testing revenge story from r/ProRevenge with Direct stakes confrontation hook.",
+      "observation": "Achieved 1000 views, 7.5% CTR, and 65.0% retention.",
+      "reasoning": "Superior audience retention (65.0%). Hook 'Direct stakes confrontation' captivated audience effectively.",
+      "rule_added": "Prioritize 'Direct stakes confrontation' hook style for revenge content.",
+      "confidence_score": 0.85
+    },
+    {
+      "id": "exp_093_202610031625",
+      "timestamp": "2026-10-03T16:25:30.407859+00:00",
+      "hypothesis": "Testing revenge story from r/ProRevenge with Direct stakes confrontation hook.",
+      "observation": "Achieved 1000 views, 7.5% CTR, and 65.0% retention.",
+      "reasoning": "Superior audience retention (65.0%). Hook 'Direct stakes confrontation' captivated audience effectively.",
+      "rule_added": "Prioritize 'Direct stakes confrontation' hook style for revenge content.",
+      "confidence_score": 0.85
+    },
+    {
+      "id": "exp_094_202610031625",
+      "timestamp": "2026-10-03T16:25:30.411048+00:00",
+      "hypothesis": "Testing drama story from r/AmItheAsshole with Direct stakes confrontation hook.",
+      "observation": "Achieved 1000 views, 7.5% CTR, and 65.0% retention.",
+      "reasoning": "Superior audience retention (65.0%). Hook 'Direct stakes confrontation' captivated audience effectively.",
+      "rule_added": "Prioritize 'Direct stakes confrontation' hook style for drama content.",
+      "confidence_score": 0.85
+    },
+    {
+      "id": "exp_095_202610031625",
+      "timestamp": "2026-10-03T16:25:30.414378+00:00",
+      "hypothesis": "Testing revenge story from r/ProRevenge with Direct stakes confrontation hook.",
+      "observation": "Achieved 1000 views, 7.5% CTR, and 65.0% retention.",
+      "reasoning": "Superior audience retention (65.0%). Hook 'Direct stakes confrontation' captivated audience effectively.",
+      "rule_added": "Prioritize 'Direct stakes confrontation' hook style for revenge content.",
+      "confidence_score": 0.85
+    },
+    {
+      "id": "exp_096_202610031625",
+      "timestamp": "2026-10-03T16:25:30.417742+00:00",
+      "hypothesis": "Testing revenge story from r/ProRevenge with Direct stakes confrontation hook.",
+      "observation": "Achieved 1000 views, 7.5% CTR, and 65.0% retention.",
+      "reasoning": "Superior audience retention (65.0%). Hook 'Direct stakes confrontation' captivated audience effectively.",
+      "rule_added": "Prioritize 'Direct stakes confrontation' hook style for revenge content.",
+      "confidence_score": 0.85
+    },
+    {
+      "id": "exp_097_202610031625",
+      "timestamp": "2026-10-03T16:25:30.421238+00:00",
+      "hypothesis": "Testing revenge story from r/ProRevenge with Direct stakes confrontation hook.",
+      "observation": "Achieved 1000 views, 7.5% CTR, and 65.0% retention.",
+      "reasoning": "Superior audience retention (65.0%). Hook 'Direct stakes confrontation' captivated audience effectively.",
+      "rule_added": "Prioritize 'Direct stakes confrontation' hook style for revenge content.",
+      "confidence_score": 0.85
+    },
+    {
+      "id": "exp_098_202610031625",
+      "timestamp": "2026-10-03T16:25:30.424504+00:00",
+      "hypothesis": "Testing revenge story from r/ProRevenge with Direct stakes confrontation hook.",
+      "observation": "Achieved 1000 views, 7.5% CTR, and 65.0% retention.",
+      "reasoning": "Superior audience retention (65.0%). Hook 'Direct stakes confrontation' captivated audience effectively.",
+      "rule_added": "Prioritize 'Direct stakes confrontation' hook style for revenge content.",
+      "confidence_score": 0.85
+    },
+    {
+      "id": "exp_099_202610031625",
+      "timestamp": "2026-10-03T16:25:30.427735+00:00",
+      "hypothesis": "Testing revenge story from r/ProRevenge with Direct stakes confrontation hook.",
+      "observation": "Achieved 1000 views, 7.5% CTR, and 65.0% retention.",
+      "reasoning": "Superior audience retention (65.0%). Hook 'Direct stakes confrontation' captivated audience effectively.",
+      "rule_added": "Prioritize 'Direct stakes confrontation' hook style for revenge content.",
+      "confidence_score": 0.85
+    },
+    {
+      "id": "exp_100_202610031625",
+      "timestamp": "2026-10-03T16:25:30.431092+00:00",
+      "hypothesis": "Testing revenge story from r/ProRevenge with Direct stakes confrontation hook.",
+      "observation": "Achieved 1000 views, 7.5% CTR, and 65.0% retention.",
+      "reasoning": "Superior audience retention (65.0%). Hook 'Direct stakes confrontation' captivated audience effectively.",
+      "rule_added": "Prioritize 'Direct stakes confrontation' hook style for revenge content.",
+      "confidence_score": 0.85
+    },
+    {
+      "id": "exp_101_202610031625",
+      "timestamp": "2026-10-03T16:25:30.434515+00:00",
+      "hypothesis": "Testing revenge story from r/ProRevenge with Direct stakes confrontation hook.",
+      "observation": "Achieved 1000 views, 7.5% CTR, and 65.0% retention.",
+      "reasoning": "Superior audience retention (65.0%). Hook 'Direct stakes confrontation' captivated audience effectively.",
+      "rule_added": "Prioritize 'Direct stakes confrontation' hook style for revenge content.",
+      "confidence_score": 0.85
+    },
+    {
+      "id": "exp_102_202610031625",
+      "timestamp": "2026-10-03T16:25:30.438158+00:00",
+      "hypothesis": "Testing revenge story from r/ProRevenge with Direct stakes confrontation hook.",
+      "observation": "Achieved 1000 views, 7.5% CTR, and 65.0% retention.",
+      "reasoning": "Superior audience retention (65.0%). Hook 'Direct stakes confrontation' captivated audience effectively.",
+      "rule_added": "Prioritize 'Direct stakes confrontation' hook style for revenge content.",
+      "confidence_score": 0.85
+    },
+    {
+      "id": "exp_103_202610031625",
+      "timestamp": "2026-10-03T16:25:30.441785+00:00",
+      "hypothesis": "Testing revenge story from r/ProRevenge with Direct stakes confrontation hook.",
+      "observation": "Achieved 1000 views, 7.5% CTR, and 65.0% retention.",
+      "reasoning": "Superior audience retention (65.0%). Hook 'Direct stakes confrontation' captivated audience effectively.",
+      "rule_added": "Prioritize 'Direct stakes confrontation' hook style for revenge content.",
+      "confidence_score": 0.85
+    },
+    {
+      "id": "exp_104_202610031625",
+      "timestamp": "2026-10-03T16:25:30.445285+00:00",
+      "hypothesis": "Testing revenge story from r/ProRevenge with Direct stakes confrontation hook.",
+      "observation": "Achieved 1000 views, 7.5% CTR, and 65.0% retention.",
+      "reasoning": "Superior audience retention (65.0%). Hook 'Direct stakes confrontation' captivated audience effectively.",
+      "rule_added": "Prioritize 'Direct stakes confrontation' hook style for revenge content.",
+      "confidence_score": 0.85
+    },
+    {
+      "id": "exp_105_202610031625",
+      "timestamp": "2026-10-03T16:25:30.448643+00:00",
+      "hypothesis": "Testing drama story from r/AmItheAsshole with Direct stakes confrontation hook.",
+      "observation": "Achieved 1000 views, 7.5% CTR, and 65.0% retention.",
+      "reasoning": "Superior audience retention (65.0%). Hook 'Direct stakes confrontation' captivated audience effectively.",
+      "rule_added": "Prioritize 'Direct stakes confrontation' hook style for drama content.",
+      "confidence_score": 0.85
+    },
+    {
+      "id": "exp_106_202610031628",
+      "timestamp": "2026-10-03T16:28:34.798956+00:00",
+      "hypothesis": "Testing horror story from r/nosleep with Direct stakes confrontation hook.",
+      "observation": "Achieved 1250 views, 7.4% CTR, and 64.2% retention.",
+      "reasoning": "",
+      "rule_added": "Maintain baseline pacing for horror.",
+      "confidence_score": 0.85
+    },
+    {
+      "id": "exp_107_202610031628",
+      "timestamp": "2026-10-03T16:28:34.805526+00:00",
+      "hypothesis": "Testing drama story from r/AmItheAsshole with Direct stakes confrontation hook.",
+      "observation": "Achieved 1000 views, 7.5% CTR, and 65.0% retention.",
+      "reasoning": "Superior audience retention (65.0%). Hook 'Direct stakes confrontation' captivated audience effectively.",
+      "rule_added": "Prioritize 'Direct stakes confrontation' hook style for drama content.",
+      "confidence_score": 0.85
+    },
+    {
+      "id": "exp_108_202610031628",
+      "timestamp": "2026-10-03T16:28:34.812329+00:00",
+      "hypothesis": "Testing drama story from r/AmItheAsshole with Direct stakes confrontation hook.",
+      "observation": "Achieved 1000 views, 7.5% CTR, and 65.0% retention.",
+      "reasoning": "Superior audience retention (65.0%). Hook 'Direct stakes confrontation' captivated audience effectively.",
+      "rule_added": "Prioritize 'Direct stakes confrontation' hook style for drama content.",
+      "confidence_score": 0.85
+    },
+    {
+      "id": "exp_109_202610031628",
+      "timestamp": "2026-10-03T16:28:34.819389+00:00",
+      "hypothesis": "Testing revenge story from r/ProRevenge with Direct stakes confrontation hook.",
+      "observation": "Achieved 1000 views, 7.5% CTR, and 65.0% retention.",
+      "reasoning": "Superior audience retention (65.0%). Hook 'Direct stakes confrontation' captivated audience effectively.",
+      "rule_added": "Prioritize 'Direct stakes confrontation' hook style for revenge content.",
+      "confidence_score": 0.85
+    },
+    {
+      "id": "exp_110_202610031628",
+      "timestamp": "2026-10-03T16:28:34.838469+00:00",
+      "hypothesis": "Testing revenge story from r/ProRevenge with Direct stakes confrontation hook.",
+      "observation": "Achieved 1000 views, 7.5% CTR, and 65.0% retention.",
+      "reasoning": "Superior audience retention (65.0%). Hook 'Direct stakes confrontation' captivated audience effectively.",
+      "rule_added": "Prioritize 'Direct stakes confrontation' hook style for revenge content.",
+      "confidence_score": 0.85
+    },
+    {
+      "id": "exp_111_202610031628",
+      "timestamp": "2026-10-03T16:28:34.842062+00:00",
+      "hypothesis": "Testing revenge story from r/ProRevenge with Direct stakes confrontation hook.",
+      "observation": "Achieved 1000 views, 7.5% CTR, and 65.0% retention.",
+      "reasoning": "Superior audience retention (65.0%). Hook 'Direct stakes confrontation' captivated audience effectively.",
+      "rule_added": "Prioritize 'Direct stakes confrontation' hook style for revenge content.",
+      "confidence_score": 0.85
+    },
+    {
+      "id": "exp_112_202610031628",
+      "timestamp": "2026-10-03T16:28:34.847002+00:00",
+      "hypothesis": "Testing drama story from r/AmItheAsshole with Direct stakes confrontation hook.",
+      "observation": "Achieved 1000 views, 7.5% CTR, and 65.0% retention.",
+      "reasoning": "Superior audience retention (65.0%). Hook 'Direct stakes confrontation' captivated audience effectively.",
+      "rule_added": "Prioritize 'Direct stakes confrontation' hook style for drama content.",
+      "confidence_score": 0.85
+    },
+    {
+      "id": "exp_113_202610031628",
+      "timestamp": "2026-10-03T16:28:34.870001+00:00",
+      "hypothesis": "Testing revenge story from r/ProRevenge with Direct stakes confrontation hook.",
+      "observation": "Achieved 1000 views, 7.5% CTR, and 65.0% retention.",
+      "reasoning": "Superior audience retention (65.0%). Hook 'Direct stakes confrontation' captivated audience effectively.",
+      "rule_added": "Prioritize 'Direct stakes confrontation' hook style for revenge content.",
+      "confidence_score": 0.85
+    },
+    {
+      "id": "exp_114_202610031628",
+      "timestamp": "2026-10-03T16:28:34.873639+00:00",
+      "hypothesis": "Testing revenge story from r/ProRevenge with Direct stakes confrontation hook.",
+      "observation": "Achieved 1000 views, 7.5% CTR, and 65.0% retention.",
+      "reasoning": "Superior audience retention (65.0%). Hook 'Direct stakes confrontation' captivated audience effectively.",
+      "rule_added": "Prioritize 'Direct stakes confrontation' hook style for revenge content.",
+      "confidence_score": 0.85
+    },
+    {
+      "id": "exp_115_202610031628",
+      "timestamp": "2026-10-03T16:28:34.877446+00:00",
+      "hypothesis": "Testing revenge story from r/ProRevenge with Direct stakes confrontation hook.",
+      "observation": "Achieved 1000 views, 7.5% CTR, and 65.0% retention.",
+      "reasoning": "Superior audience retention (65.0%). Hook 'Direct stakes confrontation' captivated audience effectively.",
+      "rule_added": "Prioritize 'Direct stakes confrontation' hook style for revenge content.",
+      "confidence_score": 0.85
+    },
+    {
+      "id": "exp_116_202610031628",
+      "timestamp": "2026-10-03T16:28:34.881210+00:00",
+      "hypothesis": "Testing revenge story from r/ProRevenge with Direct stakes confrontation hook.",
+      "observation": "Achieved 1000 views, 7.5% CTR, and 65.0% retention.",
+      "reasoning": "Superior audience retention (65.0%). Hook 'Direct stakes confrontation' captivated audience effectively.",
+      "rule_added": "Prioritize 'Direct stakes confrontation' hook style for revenge content.",
+      "confidence_score": 0.85
+    },
+    {
+      "id": "exp_117_202610031628",
+      "timestamp": "2026-10-03T16:28:34.894586+00:00",
+      "hypothesis": "Testing revenge story from r/ProRevenge with Direct stakes confrontation hook.",
+      "observation": "Achieved 1000 views, 7.5% CTR, and 65.0% retention.",
+      "reasoning": "Superior audience retention (65.0%). Hook 'Direct stakes confrontation' captivated audience effectively.",
+      "rule_added": "Prioritize 'Direct stakes confrontation' hook style for revenge content.",
+      "confidence_score": 0.85
+    },
+    {
+      "id": "exp_118_202610031628",
+      "timestamp": "2026-10-03T16:28:34.905284+00:00",
+      "hypothesis": "Testing revenge story from r/ProRevenge with Direct stakes confrontation hook.",
+      "observation": "Achieved 1000 views, 7.5% CTR, and 65.0% retention.",
+      "reasoning": "Superior audience retention (65.0%). Hook 'Direct stakes confrontation' captivated audience effectively.",
+      "rule_added": "Prioritize 'Direct stakes confrontation' hook style for revenge content.",
+      "confidence_score": 0.85
+    },
+    {
+      "id": "exp_119_202610031628",
+      "timestamp": "2026-10-03T16:28:34.916563+00:00",
+      "hypothesis": "Testing revenge story from r/ProRevenge with Direct stakes confrontation hook.",
+      "observation": "Achieved 1000 views, 7.5% CTR, and 65.0% retention.",
+      "reasoning": "Superior audience retention (65.0%). Hook 'Direct stakes confrontation' captivated audience effectively.",
+      "rule_added": "Prioritize 'Direct stakes confrontation' hook style for revenge content.",
+      "confidence_score": 0.85
+    },
+    {
+      "id": "exp_120_202610031628",
+      "timestamp": "2026-10-03T16:28:34.935144+00:00",
+      "hypothesis": "Testing revenge story from r/ProRevenge with Direct stakes confrontation hook.",
+      "observation": "Achieved 1000 views, 7.5% CTR, and 65.0% retention.",
+      "reasoning": "Superior audience retention (65.0%). Hook 'Direct stakes confrontation' captivated audience effectively.",
+      "rule_added": "Prioritize 'Direct stakes confrontation' hook style for revenge content.",
+      "confidence_score": 0.85
+    },
+    {
+      "id": "exp_121_202610031628",
+      "timestamp": "2026-10-03T16:28:34.946351+00:00",
+      "hypothesis": "Testing revenge story from r/ProRevenge with Direct stakes confrontation hook.",
+      "observation": "Achieved 1000 views, 7.5% CTR, and 65.0% retention.",
+      "reasoning": "Superior audience retention (65.0%). Hook 'Direct stakes confrontation' captivated audience effectively.",
+      "rule_added": "Prioritize 'Direct stakes confrontation' hook style for revenge content.",
+      "confidence_score": 0.85
+    },
+    {
+      "id": "exp_122_202610031628",
+      "timestamp": "2026-10-03T16:28:34.964478+00:00",
+      "hypothesis": "Testing revenge story from r/ProRevenge with Direct stakes confrontation hook.",
+      "observation": "Achieved 1000 views, 7.5% CTR, and 65.0% retention.",
+      "reasoning": "Superior audience retention (65.0%). Hook 'Direct stakes confrontation' captivated audience effectively.",
+      "rule_added": "Prioritize 'Direct stakes confrontation' hook style for revenge content.",
+      "confidence_score": 0.85
+    },
+    {
+      "id": "exp_123_202610031628",
+      "timestamp": "2026-10-03T16:28:34.975915+00:00",
+      "hypothesis": "Testing drama story from r/AmItheAsshole with Direct stakes confrontation hook.",
+      "observation": "Achieved 1000 views, 7.5% CTR, and 65.0% retention.",
+      "reasoning": "Superior audience retention (65.0%). Hook 'Direct stakes confrontation' captivated audience effectively.",
+      "rule_added": "Prioritize 'Direct stakes confrontation' hook style for drama content.",
+      "confidence_score": 0.85
+    },
+    {
+      "id": "exp_124_202610031628",
+      "timestamp": "2026-10-03T16:28:34.994586+00:00",
+      "hypothesis": "Testing revenge story from r/ProRevenge with Direct stakes confrontation hook.",
+      "observation": "Achieved 1000 views, 7.5% CTR, and 65.0% retention.",
+      "reasoning": "Superior audience retention (65.0%). Hook 'Direct stakes confrontation' captivated audience effectively.",
+      "rule_added": "Prioritize 'Direct stakes confrontation' hook style for revenge content.",
+      "confidence_score": 0.85
     }
   ],
   "channel_stats_summary": {
@@ -847,15 +1180,15 @@
   },
   "voice_performance": {
     "en-US-ChristopherNeural": {
-      "total_views": 73043,
-      "video_count": 76,
-      "avg_retention_pct": 64.4,
+      "total_views": 108076,
+      "video_count": 116,
+      "avg_retention_pct": 63.6,
       "language": "english",
       "weight": 1.8
     },
     "hi-IN-SwaraNeural": {
-      "total_views": 12,
-      "video_count": 6,
+      "total_views": 13,
+      "video_count": 8,
       "avg_retention_pct": 55.0,
       "language": "hindi",
       "weight": 1.0
